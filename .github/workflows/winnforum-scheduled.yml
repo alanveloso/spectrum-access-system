@@ -1,0 +1,169 @@
+# Scheduled official WInnForum harness LIVE regression.
+#
+# NOT a merge gate. NOT certification / acceptance evidence.
+# Does not invent PASS. Artifacts are regression telemetry only.
+#
+# Timing: cron approaches America/Los_Angeles 02:00 so FDB.8 can use the
+# real CPAS window; broad campaign runs afterward in the same job.
+name: winnforum-scheduled
+
+"on":
+  schedule:
+    # ~01:45 America/Los_Angeles year-round via wait script:
+    # PDT (UTC-7) → 08:45 UTC; PST (UTC-8) → arrives earlier and waits.
+    - cron: "45 8 * * *"
+  workflow_dispatch:
+    inputs:
+      run_fdb8:
+        description: "Run time-gated FDB.8 (waits for LA 02:00–04:00)"
+        type: boolean
+        default: true
+      run_broad:
+        description: "Run full non-time-gated official campaign after FDB.8"
+        type: boolean
+        default: true
+      skip_window_wait:
+        description: "Skip LA window wait (manual only; FDB.8 will fail outside window)"
+        type: boolean
+        default: false
+
+concurrency:
+  group: winnforum-scheduled-${{ github.repository }}
+  cancel-in-progress: false
+
+permissions:
+  contents: read
+
+jobs:
+  official-harness-near-la-window:
+    name: official-harness-near-la-window
+    runs-on: ubuntu-latest
+    # FDB.8 ≈ 2–3h + broad campaign can be multi-hour; Actions hard cap is 6h.
+    timeout-minutes: 360
+    env:
+      HARNESS_COMMIT: "928c3150adf7b31e53a96b695bf1fbdd3284ecb2"
+      WINNFORUM_DOCKER_IMAGE: "winnforum-sas-harness:928c3150"
+      SAS_EXECUTION_MODE: certification
+      # Regression telemetry only — not a certification claim.
+      WINNFORUM_CI_ROLE: scheduled-regression
+    steps:
+      - name: Disclaimer
+        run: |
+          echo "Scheduled official harness LIVE regression."
+          echo "NOT a merge gate. NOT certification. Does not invent PASS."
+
+      - uses: actions/checkout@v4
+        with:
+          submodules: recursive
+
+      - name: Free disk space
+        run: |
+          sudo rm -rf /usr/share/dotnet /usr/local/lib/android /opt/ghc || true
+          docker system prune -af || true
+          df -h
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Install system deps
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y --no-install-recommends \
+            libgeos-dev git-lfs
+          git lfs install --skip-repo
+
+      - name: Install Python package
+        run: |
+          python -m pip install --upgrade 'pip==25.2'
+          pip install -r requirements.lock.txt -r requirements-dev.txt
+          pip install ./plugins/spectrum-propagation --no-deps
+          pip install -e . --no-deps
+
+      - name: Prepare harness / PKI / Common-Data / image
+        env:
+          COMMON_DATA_ROOT: ${{ github.workspace }}/.cache/Common-Data
+        run: |
+          chmod +x tools/winnforum/ci_prepare_scheduled.sh \
+            tools/winnforum/wait_la_cpas_window.sh \
+            tools/winnforum/run_docker_campaign.sh \
+            tools/winnforum/fetch_common_data.sh \
+            tools/winnforum/sync_uut_ned_tiles.sh \
+            tools/winnforum/sync_uut_nlcd_tiles.sh \
+            tools/winnforum/sync_uut_county_geometries.sh
+          tools/winnforum/ci_prepare_scheduled.sh
+
+      - name: Wait for America/Los_Angeles CPAS window
+        if: ${{ (github.event_name == 'schedule' || inputs.run_fdb8) && (github.event_name == 'schedule' || inputs.skip_window_wait != true) }}
+        run: tools/winnforum/wait_la_cpas_window.sh 120
+
+      - name: FDB.8 (time-gated LIVE)
+        id: fdb8
+        if: ${{ github.event_name == 'schedule' || inputs.run_fdb8 }}
+        env:
+          COMMON_DATA_ROOT: ${{ github.workspace }}/.cache/Common-Data
+          WINNFORUM_COMMON_DATA: ${{ github.workspace }}/.cache/Common-Data/data
+          SAS_TERRAIN_DIR: ${{ github.workspace }}/data/geo/ned
+          SAS_COUNTY_DIR: ${{ github.workspace }}/data/geo/county
+          DATABASE_URL: sqlite:////tmp/sas-winnforum-scheduled.db
+        run: |
+          PKI="${GITHUB_WORKSPACE}/.cache/winnforum-harness-pki"
+          python -m tools.run_winnforum \
+            --docker-harness --start-uut \
+            --case FDB.8 \
+            --certs-dir "$PKI" \
+            --client-cert "$PKI/admin.cert" \
+            --client-key "$PKI/admin.key" \
+            --ca-certs "$PKI/ca.cert" \
+            --artifacts-root artifacts/winnforum/scheduled
+        continue-on-error: true
+
+      - name: Broad non-time-gated campaign
+        id: broad
+        if: ${{ github.event_name == 'schedule' || inputs.run_broad }}
+        env:
+          COMMON_DATA_ROOT: ${{ github.workspace }}/.cache/Common-Data
+          WINNFORUM_COMMON_DATA: ${{ github.workspace }}/.cache/Common-Data/data
+          SAS_TERRAIN_DIR: ${{ github.workspace }}/data/geo/ned
+          SAS_COUNTY_DIR: ${{ github.workspace }}/data/geo/county
+          DATABASE_URL: sqlite:////tmp/sas-winnforum-scheduled-broad.db
+        run: |
+          PKI="${GITHUB_WORKSPACE}/.cache/winnforum-harness-pki"
+          # Same families as tools/winnforum/run_docker_campaign.sh (no FDB.8).
+          python -m tools.run_winnforum \
+            --docker-harness --start-uut \
+            --family REG --family SIQ --family GRA --family HBT --family RLQ --family DRG \
+            --family FAD --family SSS --family BPR --family EPR --family EXZ --family FPR \
+            --family GPR --family IPR --family MCP --family MES --family PAT --family PCR \
+            --family PPR --family QPR --family SCS --family SDS --family WDB \
+            --case FDB.1 --case FDB.2 --case FDB.3 --case FDB.4 --case FDB.5 --case FDB.6 \
+            --certs-dir "$PKI" \
+            --client-cert "$PKI/admin.cert" \
+            --client-key "$PKI/admin.key" \
+            --ca-certs "$PKI/ca.cert" \
+            --artifacts-root artifacts/winnforum/scheduled
+        continue-on-error: true
+
+      - name: Upload scheduled harness artifacts
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: winnforum-scheduled-${{ github.run_id }}
+          path: artifacts/winnforum/scheduled/
+          if-no-files-found: warn
+          retention-days: 30
+
+      - name: Summarize (no PASS/certification claims)
+        if: always()
+        run: |
+          echo "## WInnForum scheduled regression" >> "$GITHUB_STEP_SUMMARY"
+          echo "" >> "$GITHUB_STEP_SUMMARY"
+          echo "- Role: scheduled regression only (not merge gate, not certification)." >> "$GITHUB_STEP_SUMMARY"
+          echo "- FDB.8 step outcome: \`${{ steps.fdb8.outcome || 'skipped' }}\`" >> "$GITHUB_STEP_SUMMARY"
+          echo "- Broad campaign outcome: \`${{ steps.broad.outcome || 'skipped' }}\`" >> "$GITHUB_STEP_SUMMARY"
+          echo "- Artifacts: \`winnforum-scheduled-${{ github.run_id }}\`" >> "$GITHUB_STEP_SUMMARY"
+          if [[ "${{ steps.fdb8.outcome }}" == "failure" || "${{ steps.broad.outcome }}" == "failure" ]]; then
+            echo "" >> "$GITHUB_STEP_SUMMARY"
+            echo "One or more LIVE steps failed — inspect artifacts. This does not invent PASS." >> "$GITHUB_STEP_SUMMARY"
+            exit 1
+          fi

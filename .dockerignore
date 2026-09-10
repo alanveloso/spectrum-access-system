@@ -1,0 +1,46 @@
+# Keep the Docker build context small and free of local secrets / caches.
+.git
+.github
+.venv
+__pycache__
+**/__pycache__
+*.pyc
+**/*.pyc
+.pytest_cache
+.mypy_cache
+.ruff_cache
+.coverage
+htmlcov
+.cache
+!.cache/winnforum-harness-src/**
+artifacts
+*.db
+*.db-journal
+*.sqlite
+*.sqlite3
+sas_mvp.db
+.env
+.env.*
+!.env.example
+certs
+docs
+.cursor
+*.md
+!README.md
+!LICENSE
+# Large optional RF / certification payloads (image keeps VERSION/README only).
+# Developer-local Common-Data sync copies must never enter production images.
+data/geo/ned/**
+!data/geo/ned/README.md
+!data/geo/ned/VERSION
+data/geo/nlcd/**
+!data/geo/nlcd/README.md
+!data/geo/nlcd/VERSION
+data/geo/county/**
+!data/geo/county/README.md
+!data/geo/county/VERSION
+data/ntia/**
+!data/ntia/README.md
+!data/ntia/VERSION
+# Tests are not required at runtime inside the production image.
+tests

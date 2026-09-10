@@ -1,0 +1,61 @@
+# Machine-readable baseline for Profile-Driven Architecture v1 (frozen).
+# Not consumed by runtime tooling — documentation/reproducibility only.
+
+version: profile-driven-v1
+status: frozen
+
+tests:
+  passed: 1470
+  skipped: 19
+  xfailed: 0
+  failed: 0
+
+# Canonical hashes for this clean v1 baseline.
+profile_hashes:
+  cbrs_winnforum: 27e83545a62be543e23691a52fc1de5570877c9305f628f956bd2fbaf209158b
+  br_anatel_slp_3700: cbdb21ef3178a32ec14e7aba7f57d3b8159c15a420204ee2b495f157db39bb90
+  eu_elsa: 0ca44d8afe71948e15b743a5a11d3adc220e638297e62fde7cf0921d3e27a044
+  # metadata.references: removed project ticket IDs (G10-*/G9-*); regulatory refs retained.
+  us_tvws_15_711: 2eafa5766c07ecf0d893c56f08a21c66d0be93ea5d37ef749420e72bc7277474
+
+submodule_pin:
+  plugins/spectrum-propagation: d54f2f8f52e9fbde7781fba1fbf0900e366c7300
+
+persistence_attribution:
+  positive_protocol_id: winnforum-rest  # semantic; ≠ plugin name winnforum_rest
+  positive_mechanisms:
+    - aggregate_linear_power
+    - single_link_threshold
+  rejected_generic_signals:
+    - device_adapter_presence
+    - network_adapter_presence
+    - geolocation
+    - protection_entitlement
+    - channel_exclusion
+    - snapshot_evaluate_apply
+
+invariants:
+  - INV-01
+  - INV-02
+  - INV-03
+  - INV-04
+  - INV-05
+  - INV-06
+  - INV-07
+  - INV-08
+  - INV-09
+  - INV-10
+  - INV-11
+  - INV-12
+  - INV-13
+  - INV-14
+
+known_deferred_debt:
+  - network_http_workflows
+  - protocol_router_composition
+  - alembic_modularization
+  - reference_physical_extraction
+  - external_persistence_entry_points
+  - legacy_rf_selector_cleanup
+  - specialized_esc_dpa_outside_rfport
+  - dedicated_anatel_elsa_tvws_ops

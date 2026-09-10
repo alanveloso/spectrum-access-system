@@ -1,0 +1,27 @@
+# Alternate deployment: same profile/adapters/providers, different RF plugin.
+#
+# Principal variable vs runtime/deployments/reference.yaml:
+#   rf.plugin: independent_fspl  (external package sas-rf-independent-fspl)
+#
+# Requires: pip install -e tests/plugin_packages/independent_fspl
+# Without that package installed, composition fails closed (UnknownPluginError).
+
+id: alternate_independent_fspl
+version: "1.0.0"
+description: >
+  Same CBRS-oriented wiring as the reference deployment, substituting the
+  independent Free-Space RfPort plugin for the in-tree free_space backend.
+profile_hint: cbrs_winnforum
+
+protocol:
+  plugin: winnforum_rest
+
+device:
+  plugin: cbsd
+
+rf:
+  plugin: independent_fspl
+
+providers:
+  - plugin: bundle_protected_entities
+  - plugin: bundle_boundaries

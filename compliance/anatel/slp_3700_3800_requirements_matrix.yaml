@@ -1,0 +1,332 @@
+# ANATEL SLP 3700–3800 MHz requirements matrix.
+# Traceability only — not a conformity claim. Profile YAML: profiles/definitions/br_anatel_slp_3700.yaml.
+# Requirements map normative sources to the current profile, mechanisms, providers, and tests.
+version: 1
+matrix_id: anatel_slp_3700_requirements
+profile_id_target: br_anatel_slp_3700
+primary_instrument:
+  id: ATO_915_2024
+  authority: ANATEL
+  title: "Ato nº 915, de 1º de fevereiro de 2024"
+  url: "https://informacoes.anatel.gov.br/legislacao/atos-de-requisitos-tecnicos-de-gestao-do-espectro/2024/1920-ato-915"
+  focus_section: "Anexo / 5.13"
+  retrieved_note: "Items cited from the official consolidated HTML of Ato 915/2024 (section 5.13)."
+
+allowed_statuses:
+  - PLANNED_YAML
+  - GAP_DATA
+  - GAP_PRIMITIVE
+  - OUT_OF_SCOPE_EQUIP
+  - PROCESS
+  - MATRIX_TEST
+  - BUNDLE_REQUIRED
+
+sources:
+  - id: ATO_915_2024
+    authority: ANATEL
+    document: "Ato nº 915/2024 — Anexo"
+    url: "https://informacoes.anatel.gov.br/legislacao/atos-de-requisitos-tecnicos-de-gestao-do-espectro/2024/1920-ato-915"
+  - id: ATO_915_2024_ART
+    authority: ANATEL
+    document: "Ato nº 915/2024 — arts. 1º–3º"
+    url: "https://informacoes.anatel.gov.br/legislacao/atos-de-requisitos-tecnicos-de-gestao-do-espectro/2024/1920-ato-915"
+  - id: ANATEL_PRIVATE_NETWORKS
+    authority: ANATEL
+    document: "ANATEL — Redes Privativas"
+    url: "https://www.gov.br/anatel/pt-br/regulado/radiofrequencia/redes-privativas"
+  - id: ARCH_PROFILE_DESIGN
+    authority: project
+    document: "Profile-driven architecture design decisions — static authorization and classless access"
+    url: null
+
+requirements:
+  - id: BR-SLP-3700-001
+    source: ATO_915_2024
+    section: "5.13.1 / Tabela XII"
+    summary: "Operational band 3700–3800 MHz; blocks F1=3700 MHz, BW=10 MHz, N=10."
+    profile_field: "spectrum.ranges; spectrum.channelization"
+    mechanisms:
+      - fixed_width_channelization
+    code_plugin: null
+    test: null
+    status: PLANNED_YAML
+
+  - id: BR-SLP-3700-002
+    source: ATO_915_2024
+    section: "5.13.2"
+    summary: "Time-division duplex (TDD) required in the sub-band."
+    profile_field: "constraints.duplex_mode"
+    mechanisms:
+      - duplex_mode
+    code_plugin: null
+    test: "tests/unit/test_station_constraints.py"
+    status: PLANNED_YAML
+
+  - id: BR-SLP-3700-003
+    source: ATO_915_2024
+    section: "5.13.3-I"
+    summary: "Max e.i.r.p. PSD base/nodal indoor: 30 dBm/10 MHz."
+    profile_field: "power.mechanism=rule_table (indoor)"
+    mechanisms:
+      - rule_table
+    code_plugin: null
+    test: null
+    status: PLANNED_YAML
+    numeric_notes:
+      - "30 dBm/10 MHz indoor base/nodal"
+
+  - id: BR-SLP-3700-004
+    source: ATO_915_2024
+    section: "5.13.3-II"
+    summary: "Max e.i.r.p. PSD base/nodal outdoor: 26 dBm/10 MHz."
+    profile_field: "power.mechanism=rule_table (outdoor)"
+    mechanisms:
+      - rule_table
+    code_plugin: null
+    test: null
+    status: PLANNED_YAML
+    numeric_notes:
+      - "26 dBm/10 MHz outdoor base/nodal"
+
+  - id: BR-SLP-3700-005
+    source: ATO_915_2024
+    section: "5.13.3-III"
+    summary: "Max e.i.r.p. mobile/terminal: 26 dBm (+2 dB conformity tolerance)."
+    profile_field: "power.mechanism=rule_table (terminal)"
+    mechanisms:
+      - rule_table
+    code_plugin: null
+    test: null
+    status: PLANNED_YAML
+    numeric_notes:
+      - "26 dBm terminal e.i.r.p.; +2 dB tolerance is equipment conformity, not core logic"
+
+  - id: BR-SLP-3700-006
+    source: ATO_915_2024
+    section: "5.13.3.1"
+    summary: "Signal boosters/repeaters forbidden for terrestrial systems in this band."
+    profile_field: "constraints.forbidden_device_roles"
+    mechanisms:
+      - forbidden_device_roles
+    code_plugin: null
+    test: "tests/unit/test_station_constraints.py"
+    status: PLANNED_YAML
+
+  - id: BR-SLP-3700-007
+    source: ATO_915_2024
+    section: "5.13.4–5.13.11"
+    summary: "ACLR, OBUE and spurious emission masks (Tables XII-a/b/c)."
+    profile_field: null
+    mechanisms: []
+    code_plugin: null
+    test: null
+    status: OUT_OF_SCOPE_EQUIP
+
+  - id: BR-SLP-3700-008
+    source: ATO_915_2024
+    section: "5.13.12"
+    summary: "Authorization limited to property geographic limits; coverage restricted to property."
+    profile_field: "authorization; geography"
+    mechanisms:
+      - static_authorization
+      - authorized_area
+    code_plugin: "station/license ConsumerAdapter (future)"
+    test: null
+    status: PLANNED_YAML
+
+  - id: BR-SLP-3700-009
+    source: ATO_915_2024
+    section: "5.13.13"
+    summary: "Prefer indoor; outdoor only with limited coverage area."
+    profile_field: "power indoor/outdoor rules; geography area limits"
+    mechanisms:
+      - rule_table
+      - authorized_area
+    code_plugin: null
+    test: null
+    status: PLANNED_YAML
+
+  - id: BR-SLP-3700-010
+    source: ATO_915_2024
+    section: "5.13.14"
+    summary: "Outdoor base/nodal antenna height ≤ 6 m AGL."
+    profile_field: "constraints.antenna_height_limit"
+    mechanisms:
+      - antenna_height_limit
+    code_plugin: null
+    test: "tests/unit/test_station_constraints.py"
+    status: PLANNED_YAML
+    numeric_notes:
+      - "6 m AGL outdoor base/nodal"
+
+  - id: BR-SLP-3700-011
+    source: ATO_915_2024
+    section: "5.13.15"
+    summary: "Outdoor assigned bandwidth ≤ 50 MHz."
+    profile_field: "constraints.max_assignment_bandwidth; spectrum.channelization"
+    mechanisms:
+      - max_assignment_bandwidth
+      - fixed_width_channelization
+      - frequency_ranges
+    code_plugin: null
+    test: "tests/unit/test_station_constraints.py"
+    status: PLANNED_YAML
+    numeric_notes:
+      - "50 MHz max outdoor assigned bandwidth"
+
+  - id: BR-SLP-3700-012
+    source: ATO_915_2024
+    section: "5.13.16"
+    summary: "Licensed/cadastral station parameters in BDTA published for pre-coordination."
+    profile_field: "data.required_capabilities"
+    mechanisms: []
+    data_capabilities:
+      - protected_entities
+      - boundaries
+    code_plugin: "providers.operator_feature_bundle (bundle_protected_entities / bundle_boundaries)"
+    test: "tests/unit/test_operator_feature_data_provider.py"
+    status: BUNDLE_REQUIRED
+
+  - id: BR-SLP-3700-013
+    source: ATO_915_2024
+    section: "5.13.17.1"
+    summary: "Protect Anatel EMSAT (Ilha do Governador) from terrestrial emissions."
+    profile_field: "protection + geography exclusion"
+    mechanisms:
+      - exclusion_zone
+      - protection_entitlement
+    data_capabilities:
+      - protected_entities
+    code_plugin: "operator feature bundle protected_entities section"
+    test: "tests/unit/test_operator_feature_data_provider.py"
+    status: BUNDLE_REQUIRED
+
+  - id: BR-SLP-3700-014
+    source: ATO_915_2024
+    section: "5.13.17.3–5 / Tabela XII-d"
+    summary: "Minimum separation / coordination agreement terrestrial ↔ earth station."
+    profile_field: "protection.mechanisms including distance_exclusion; agreements=PROCESS"
+    mechanisms:
+      - distance_exclusion
+    data_capabilities:
+      - protected_entities
+    code_plugin: "operator feature bundle + distance_exclusion"
+    test: "tests/unit/test_operator_feature_data_provider.py"
+    status: BUNDLE_REQUIRED
+
+  - id: BR-SLP-3700-015
+    source: ATO_915_2024
+    section: "5.13.17.6–7"
+    summary: "Earth-station entrant notification, mitigation, and possible guard band."
+    profile_field: null
+    mechanisms: []
+    code_plugin: null
+    test: null
+    status: PROCESS
+
+  - id: BR-SLP-3700-016
+    source: ATO_915_2024
+    section: "5.13.18.2 / Tabela XII-e"
+    summary: "Reference separation distances between terrestrial stations (e.g. 200 m / 500 m)."
+    profile_field: "protection.distance_exclusion"
+    mechanisms:
+      - distance_exclusion
+    data_capabilities:
+      - protected_entities
+    code_plugin: "operator feature bundle + distance_exclusion"
+    test: "tests/unit/test_operator_feature_data_provider.py"
+    status: BUNDLE_REQUIRED
+
+  - id: BR-SLP-3700-017
+    source: ATO_915_2024
+    section: "5.13.18.4"
+    summary: "If outdoor vs indoor coexistence is proven infeasible, indoor has priority."
+    profile_field: "coexistence policy (not dynamic access ordered_classes)"
+    mechanisms: []
+    code_plugin: null
+    test: null
+    status: GAP_PRIMITIVE
+
+  - id: BR-SLP-3700-018
+    source: ATO_915_2024
+    section: "5.13.18.5"
+    summary: "Common TDD clock sync among neighboring terrestrial systems when required."
+    profile_field: null
+    mechanisms: []
+    code_plugin: null
+    test: null
+    status: PROCESS
+
+  - id: BR-SLP-3700-019
+    source: ARCH_PROFILE_DESIGN
+    section: "Static authorization semantics"
+    summary: "Local-license style authorization: long validity, no CBRS-like refresh."
+    profile_field: "authorization.mechanism=static_authorization"
+    mechanisms:
+      - static_authorization
+    code_plugin: null
+    test: null
+    status: PLANNED_YAML
+
+  - id: BR-SLP-3700-020
+    source: ARCH_PROFILE_DESIGN
+    section: "Classless access semantics"
+    summary: "Classless regime: omit access section (do not fake ordered_classes[1])."
+    profile_field: "access: omitted"
+    mechanisms: []
+    omit_profile_sections:
+      - access
+    code_plugin: null
+    test: null
+    status: PLANNED_YAML
+
+  - id: BR-SLP-3700-021
+    source: ATO_915_2024
+    section: "5.13 (absence)"
+    summary: "No CBRS-style heartbeat / transmitExpireTime as generic lease condition."
+    profile_field: "do not require dynamic_lease/periodic keep-alive"
+    mechanisms: []
+    forbid_mechanisms_as_keepalive:
+      - dynamic_lease
+      - periodic
+    code_plugin: null
+    test: null
+    status: PLANNED_YAML
+
+  - id: BR-SLP-3700-022
+    source: ATO_915_2024_ART
+    section: "Art. 1º / Art. 3º item 4.5.2"
+    summary: "Power, unwanted emission, and additional operational limits for 3700–3800 MHz are those of Ato 915."
+    profile_field: "source cross-reference for BR-SLP-3700-001..018"
+    mechanisms: []
+    code_plugin: null
+    test: "tests/unit/test_anatel_requirements_matrix.py"
+    status: MATRIX_TEST
+
+  - id: BR-SLP-3700-023
+    source: ANATEL_PRIVATE_NETWORKS
+    section: "Redes Privativas"
+    summary: "Plan context: 3700–3800 MHz listed among typical SLP private-network bands."
+    profile_field: "metadata.references"
+    mechanisms: []
+    code_plugin: null
+    test: "tests/unit/test_anatel_requirements_matrix.py"
+    status: MATRIX_TEST
+
+architecture_hypothesis_updates:
+  - hypothesis: "3700–3800 MHz band"
+    verdict: confirmed
+    by: BR-SLP-3700-001
+  - hypothesis: "static_authorization primary"
+    verdict: confirmed
+    by: BR-SLP-3700-008
+  - hypothesis: "omit access (classless)"
+    verdict: maintained
+    by: BR-SLP-3700-020
+  - hypothesis: "no CBRS-like heartbeat"
+    verdict: maintained
+    by: BR-SLP-3700-021
+  - hypothesis: "power limits only qualitative"
+    verdict: superseded
+    by: BR-SLP-3700-003
+    note: "Ato 915 §5.13.3 I–III publishes explicit e.i.r.p. limits"

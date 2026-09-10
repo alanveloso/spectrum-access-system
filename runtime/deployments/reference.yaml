@@ -1,0 +1,34 @@
+# Reference deployment for the current working CBRS-oriented installation.
+#
+# This document selects implementations. It is NOT a Spectrum Profile.
+# Regulatory behaviour comes from profiles/definitions/*.yaml (e.g. cbrs_winnforum).
+#
+# profile_hint is operator documentation only — composition never dispatches
+# on profile id or country.
+
+id: reference
+version: "1.0.0"
+description: >
+  Explicit reference wiring for the current in-tree adapters, WInnForum REST
+  protocol adapter, free-space RF entry point, and shipped data providers.
+  Every data capability required by the active Spectrum Profile must be
+  selected here; RuntimeComposition fails closed when a required authority is
+  missing.
+profile_hint: cbrs_winnforum
+
+protocol:
+  plugin: winnforum_rest
+
+device:
+  plugin: cbsd
+
+rf:
+  plugin: free_space
+
+providers:
+  - plugin: protection_terrain
+  - plugin: protection_land_cover
+  - plugin: protection_boundaries
+  - plugin: protection_reference
+  - plugin: protection_rights
+  - plugin: bundle_protected_entities

@@ -1,0 +1,15 @@
+fastapi==0.141.1
+uvicorn[standard]==0.52.1
+sqlalchemy==2.0.51
+alembic==1.16.4
+pydantic==2.13.4
+pydantic-settings==2.14.2
+psycopg2-binary==2.9.12
+celery==5.6.3
+cryptography==50.0.0
+httpx==0.28.1
+PyYAML==6.0.3
+shapely==1.7.1
+numpy==1.26.4
+pykml==0.2.0
+# spectrum-propagation: install from submodule (see scripts/install_plugins.sh)

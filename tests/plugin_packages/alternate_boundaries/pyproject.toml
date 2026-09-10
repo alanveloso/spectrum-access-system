@@ -1,0 +1,17 @@
+[build-system]
+requires = ["setuptools==75.8.2", "wheel==0.45.1"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "sas-test-alternate-boundaries"
+version = "0.1.0"
+description = "Test-only boundaries DataProvider for SAS substitutability proofs"
+requires-python = ">=3.11"
+dependencies = []
+
+[project.entry-points."spectrum_access.data_providers"]
+mapping_boundaries = "sas_test_alternate_boundaries:mapping_boundaries_provider"
+
+[tool.setuptools.packages.find]
+where = ["."]
+include = ["sas_test_alternate_boundaries*"]

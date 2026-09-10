@@ -1,0 +1,43 @@
+# Test-only synthetic Spectrum Profile. Not a real regulatory regime.
+#
+# Purpose: architecture fitness. The capability combination below is deliberately
+# absent from every builtin profile (cbrs_winnforum, br_anatel_slp_3700,
+# eu_elsa, us_tvws_15_711):
+#
+#   - no rf section at all              (all builtins declare rf)
+#   - no protection section             (all builtins declare protection)
+#   - no coordination section           (all builtins declare coordination)
+#   - no data requirements              (all builtins require data capabilities)
+#   - network subset without managed_area (eu_elsa requires all four tokens)
+#   - availability mode on_demand       (builtins only use scheduled)
+api_version: spectrum-access/v2
+kind: SpectrumProfile
+metadata:
+  id: synthetic_minimal
+  version: 0.1.0
+  status: custom
+
+spectrum:
+  ranges:
+    - id: primary
+      low_hz: 24250000000
+      high_hz: 24350000000
+
+temporal:
+  availability:
+    mechanism: availability_constraint
+    mode: on_demand
+
+power:
+  mechanism: rule_table
+  rules:
+    - max_eirp_dbm: 20.0
+
+constraints:
+  - mechanism: duplex_mode
+    mode: simplex
+
+requirements:
+  network_capabilities:
+    - network_identity
+    - frequency_range

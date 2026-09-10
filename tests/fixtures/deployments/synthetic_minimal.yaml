@@ -1,0 +1,11 @@
+# Test-only DeploymentConfig for the synthetic_minimal profile.
+#
+# Selects nothing but a network adapter: no protocol, no device, no RF, no
+# providers. Everything selected here is an installed entry-point plugin, so the
+# composition is reproducible from the installed distribution.
+id: synthetic_minimal_lab
+version: 1.0.0
+description: Minimal network-only deployment used by architecture fitness tests.
+profile_hint: synthetic_minimal
+network:
+  plugin: managed

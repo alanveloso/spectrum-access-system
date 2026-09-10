@@ -1,0 +1,19 @@
+# Test-only deployment: boundaries capability via reference protection provider.
+# Same profile/runtime requirements as boundaries_provider_b; differs only in provider selection.
+
+id: boundaries_provider_a
+version: "1.0.0"
+description: Lego proof deployment A — protection_boundaries for boundaries capability.
+profile_hint: cbrs_winnforum
+
+protocol:
+  plugin: winnforum_rest
+
+device:
+  plugin: cbsd
+
+rf:
+  plugin: free_space
+
+providers:
+  - plugin: protection_boundaries

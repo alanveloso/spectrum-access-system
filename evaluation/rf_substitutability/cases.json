@@ -1,0 +1,47 @@
+{
+  "description": "Deterministic path-loss cases for RF backend comparison",
+  "frequency_hz": 3625000000,
+  "rx_height_m": 1.5,
+  "cases": [
+    {
+      "id": "short_tall",
+      "tx_lat": 39.0,
+      "tx_lon": -77.0,
+      "rx_lat": 39.001,
+      "rx_lon": -77.001,
+      "tx_height_m": 200.0
+    },
+    {
+      "id": "near_low",
+      "tx_lat": 39.0,
+      "tx_lon": -77.0,
+      "rx_lat": 39.01,
+      "rx_lon": -77.01,
+      "tx_height_m": 6.0
+    },
+    {
+      "id": "near_tall",
+      "tx_lat": 39.0,
+      "tx_lon": -77.0,
+      "rx_lat": 39.01,
+      "rx_lon": -77.01,
+      "tx_height_m": 60.0
+    },
+    {
+      "id": "mid_range",
+      "tx_lat": 39.0,
+      "tx_lon": -77.0,
+      "rx_lat": 39.1,
+      "rx_lon": -77.1,
+      "tx_height_m": 30.0
+    },
+    {
+      "id": "far",
+      "tx_lat": 39.0,
+      "tx_lon": -77.0,
+      "rx_lat": 39.5,
+      "rx_lon": -77.5,
+      "tx_height_m": 30.0
+    }
+  ]
+}

@@ -1,0 +1,468 @@
+version: 1
+source_spec: WINNF-TS-4010
+source_version: V1.1.0
+baseline_spec: WINNF-TS-0061
+baseline_version: V1.5.1
+requirements_spec: WINNF-TS-1020
+requirements_version: V1.1.0
+cases:
+- id: WINNF.REL1Ext.FT.S.HBT.1
+  family: HBT
+  relation: replaces
+  baseline_case: WINNF.FT.S.HBT.1
+  section: 6.4.4.1
+  title: 'Array request: Successful Heartbeat Request'
+  requirements:
+  - REL1Ext-R1-IPM-01
+  - REL1Ext-R1-IPM-02
+  - REL1Ext-R1-IPM-03
+  data_change: 'Procedure text for successful array heartbeat is revised under TS-4010; DPA-neighborhood
+    TxExpire ≤240 s is out of scope here (covered by HBT.13).
+
+    '
+  calculation_change: none
+  response_time_change: 'Successful responses must continue to carry valid grantExpireTime / transmitExpireTime
+    per revised §6.4; DPA-specific 240 s bound deferred to HBT.13.
+
+    '
+  local_tests:
+  - tests/unit/test_heartbeat_protocol.py
+  - tests/unit/test_heartbeat_extended.py
+  - tests/unit/test_hbt_rel1ext_tx_expire.py
+  evidence: null
+  status: failing
+  notes: . Baseline HBT.1 deprecated for Rel1Ext campaigns.
+- id: WINNF.REL1Ext.FT.S.HBT.2
+  family: HBT
+  relation: replaces
+  baseline_case: WINNF.FT.S.HBT.2
+  section: 6.4.4.2
+  title: 'Array request: Successful Heartbeat Request from CBSD for Grant renewal'
+  requirements:
+  - REL1Ext-R1-IPM-01
+  - REL1Ext-R1-IPM-03
+  data_change: 'Renew path uses revised heartbeat procedure; grantRenew=TRUE expectations restated in
+    TS-4010.
+
+    '
+  calculation_change: none
+  response_time_change: 'On SUCCESS with grantRenew, grantExpireTime must be a future UTC timestamp; DPA
+    240 s TxExpire still owned by HBT.13.
+
+    '
+  local_tests:
+  - tests/unit/test_grant_renewal.py
+  - tests/unit/test_heartbeat_extended.py
+  - tests/unit/test_hbt_rel1ext_tx_expire.py
+  evidence: null
+  status: failing
+  notes: .
+- id: WINNF.REL1Ext.FT.S.HBT.4
+  family: HBT
+  relation: replaces
+  baseline_case: WINNF.FT.S.HBT.4
+  section: 6.4.4.4
+  title: Missing required parameters in Granted/Authorized heartbeat
+  requirements:
+  - REL1Ext-R1-IPM-03
+  data_change: 'Missing required heartbeat fields must yield MISSING_PARAM (102) under the revised §6.4
+    table; DPA TxExpire not the focus.
+
+    '
+  calculation_change: none
+  response_time_change: 'Unsuccessful responses must expose transmitExpireTime no later than now when
+    required by the revised response-code table.
+
+    '
+  local_tests:
+  - tests/unit/test_heartbeat_protocol.py
+  - tests/contract/test_cbsd_schema_validation.py
+  - tests/unit/test_hbt_rel1ext_tx_expire.py
+  evidence: null
+  status: failing
+  notes: .
+- id: WINNF.REL1Ext.FT.S.HBT.7
+  family: HBT
+  relation: replaces
+  baseline_case: WINNF.FT.S.HBT.7
+  section: 6.4.4.7
+  title: Unsuccessful INVALID_VALUE (responseCode 103)
+  requirements:
+  - REL1Ext-R1-IPM-03
+  data_change: 'Invalid required parameter values must map to responseCode 103 under Rel1Ext heartbeat
+    table.
+
+    '
+  calculation_change: none
+  response_time_change: none-beyond-baseline-invalid-value-semantics
+  local_tests:
+  - tests/unit/test_heartbeat_protocol.py
+  - tests/unit/test_cbsd_schemas.py
+  - tests/unit/test_hbt_rel1ext_tx_expire.py
+  evidence: null
+  status: failing
+  notes: .
+- id: WINNF.REL1Ext.FT.S.HBT.8
+  family: HBT
+  relation: replaces
+  baseline_case: WINNF.FT.S.HBT.8
+  section: 6.4.4.8
+  title: Unsuccessful BLACKLISTED (responseCode 101)
+  requirements:
+  - REL1Ext-R1-IPM-03
+  data_change: 'Blacklisted CBSD/grant heartbeats must return 101; blacklist interaction restated for
+    Rel1Ext campaigns.
+
+    '
+  calculation_change: none
+  response_time_change: none-beyond-blacklist-response-semantics
+  local_tests:
+  - tests/unit/test_heartbeat_extended.py
+  - tests/unit/test_hbt_rel1ext_tx_expire.py
+  evidence: null
+  status: failing
+  notes: '. Local coverage: test_blacklisted_cbsd_returns_101_with_ids.'
+- id: WINNF.REL1Ext.FT.S.HBT.9
+  family: HBT
+  relation: replaces
+  baseline_case: WINNF.FT.S.HBT.9
+  section: 6.4.4.9
+  title: Authorized-state heartbeat results TERMINATED_GRANT
+  requirements:
+  - REL1Ext-R1-IPM-03
+  data_change: 'Conditions that force TERMINATED_GRANT (500) for Authorized grants are restated; incumbent/protection
+    side-effects may feed this path later.
+
+    '
+  calculation_change: none
+  response_time_change: 'TERMINATED_GRANT responses must zero/expire transmit window per §6.4 table.
+
+    '
+  local_tests:
+  - tests/unit/test_lifecycle.py
+  - tests/unit/test_heartbeat_extended.py
+  - tests/unit/test_hbt_rel1ext_tx_expire.py
+  evidence: null
+  status: failing
+  notes: .
+- id: WINNF.REL1Ext.FT.S.HBT.10
+  family: HBT
+  relation: replaces
+  baseline_case: WINNF.FT.S.HBT.10
+  section: 6.4.4.10
+  title: Configurable intervening Grant termination or blacklist
+  requirements:
+  - REL1Ext-R1-IPM-03
+  data_change: 'Configurable intervening terminate/blacklist between heartbeats; harness config drives
+    timing.
+
+    '
+  calculation_change: none
+  response_time_change: configurable-intervening-state-change-then-heartbeat
+  local_tests:
+  - tests/unit/test_heartbeat_extended.py
+  - tests/unit/test_lifecycle.py
+  - tests/unit/test_hbt_rel1ext_tx_expire.py
+  evidence: null
+  status: failing
+  notes: .
+- id: WINNF.REL1Ext.FT.S.HBT.13
+  family: HBT
+  relation: new
+  baseline_case: null
+  section: 6.4.4.13
+  title: Heartbeat with grants used by CBSDs inside any DPA neighborhood
+  requirements:
+  - REL1Ext-R1-IPM-02
+  - REL1Ext-R1-IPM-03
+  data_change: 'New case: inject DPA contours; place CatA/CatB indoor/outdoor CBSDs inside configured
+    DPA neighborhoods on 3550–3650 MHz; optional portal/GB + CPAS flag.
+
+    '
+  calculation_change: 'Neighborhood membership uses DPA contour distances (CatA/CatB ≤/> 6 m AGL indoor/outdoor
+    radii from configuration) — not baseline HBT geometry.
+
+    '
+  response_time_change: 'For neighborhood CBSDs with grants overlapping 3550–3650 MHz, transmitExpireTime
+    ≤ 240 s (and ≤ grantExpireTime). Other grants ≤ 24h−1min.
+
+    '
+  local_tests:
+  - tests/unit/test_heartbeat_protocol.py
+  - tests/unit/test_heartbeat_extended.py
+  - tests/unit/test_hbt_rel1ext_tx_expire.py
+  - tests/contract/test_grant_rel1ext_tx_expire.py
+  evidence: null
+  status: failing
+  notes: 'PASS_LOCAL (+follow-up): AMSL→AGL via terrain; INDETERMINATE fail-closed; grantResponse.transmitExpireTime
+    per TS-4010 §6.4.4.13 / REL1Ext-R1-IPM-02/03. Official harness still open.'
+- id: WINNF.REL1Ext.FT.S.PAT.2
+  family: PAT
+  relation: new
+  baseline_case: null
+  section: 8.2.4.2
+  title: Propagation Model Calculation Testing for DPAs
+  requirements:
+  - REL1Ext-R2-SGN-02
+  data_change: 'Propagation Model API Type 3 configs: DPA protection points; CBSD AGL heights ≤6 m and
+    >6 m; reliability levels for ITM.
+
+    '
+  calculation_change: 'ITM toward DPA points + ITU-R P.2108 §3.2 clutter for Tx AGL ≤6 m + 8 dB network-loading/duty-cycle
+    reduction on all CBSDs toward DPA points. Antenna e/f/g not considered for PAT.2 (kept for Rel1 PAT.1
+    compatibility).
+
+    '
+  response_time_change: 'Admin Propagation Model API returns pathLoss / antenna gains within harness tolerance
+    vs reference model (same API contract family as PAT.1, updated inputs).
+
+    '
+  local_tests:
+  - tests/unit/test_propagation_service.py
+  - tests/unit/test_rel1ext_pat2.py
+  - tests/contract/test_admin_no_catchall.py
+  evidence: null
+  status: failing
+  notes: ': Type-3 uses UUT P.2108 compose (ITM+clutter≤6 m AGL+8 dB loading); local unit/cohort coverage
+    in test_rel1ext_pat2. Official harness PAT.2 (ITM+NED, ≥99.9% within +1 dB) still open — not claimed
+    PASS / PASS_LOCAL without versioned evidence.'
+- id: WINNF.REL1Ext.FT.S.IPR.1
+  family: IPR
+  relation: replaces
+  baseline_case: WINNF.FT.S.IPR.1
+  section: 8.9.4.1
+  title: In the absence of an ESC, SAS protects all ESC-monitored DPAs
+  requirements:
+  - REL1Ext-R2-IPM-01
+  - REL1Ext-R2-IPM-02
+  data_change: 'No ESC connectivity: all ESC-monitored DPAs treated as requiring protection; DPA KML/criteria
+    injection via Admin.
+
+    '
+  calculation_change: 'Aggregate interference / move-list toward DPA points uses Rel1Ext propagation mods
+    where applicable (see PAT.2 / R2-SGN-02).
+
+    '
+  response_time_change: 'Post-CPAS grant/heartbeat outcomes must enforce DPA protection without ESC activity
+    messages.
+
+    '
+  local_tests:
+  - tests/unit/test_dpa_protection_ipr.py
+  - tests/unit/test_iap_service.py
+  - tests/unit/test_cpas_pipeline.py
+  evidence: null
+  status: failing
+  notes: ': ESC absent protects ESC-monitored DPAs; local test_dpa_protection_ipr. Official open — not
+    claimed PASS.'
+- id: WINNF.REL1Ext.FT.S.IPR.2
+  family: IPR
+  relation: replaces
+  baseline_case: WINNF.FT.S.IPR.2
+  section: 8.9.4.2
+  title: Activation of Multiple Offshore DPAs
+  requirements:
+  - REL1Ext-R2-SGN-02
+  data_change: 'Multiple offshore DPA/channel pairs activated via ESC harness; multi-DPA neighborhood
+    grants.
+
+    '
+  calculation_change: 'Per-DPA aggregate checks with Rel1Ext path-loss/clutter/loading toward each active
+    offshore DPA.
+
+    '
+  response_time_change: authorize-or-terminate-within-configured-ESC-heartbeat-window
+  local_tests:
+  - tests/unit/test_dpa_protection_ipr.py
+  - tests/unit/test_iap_service.py
+  - tests/unit/test_dpa_lifecycle.py
+  evidence: null
+  status: failing
+  notes: domain wired (protected channels / movelist / grant|heartbeat hooks). Official open — not claimed
+    PASS.
+- id: WINNF.REL1Ext.FT.S.IPR.3
+  family: IPR
+  relation: replaces
+  baseline_case: WINNF.FT.S.IPR.3
+  section: 8.9.4.3
+  title: CBSD Grant Request in the Neighborhood of an Activated Offshore DPA
+  requirements:
+  - REL1Ext-R2-SGN-02
+  data_change: grant-requests-inside-active-offshore-DPA-neighborhood
+  calculation_change: neighborhood-interference-vs-active-offshore-DPA-criteria
+  response_time_change: grant-response-success-or-interference-related-failure-per-procedure
+  local_tests:
+  - tests/unit/test_dpa_protection_ipr.py
+  - tests/unit/test_grant_pal_ppa.py
+  - tests/unit/test_iap_service.py
+  evidence: null
+  status: failing
+  notes: domain wired (protected channels / movelist / grant|heartbeat hooks). Official open — not claimed
+    PASS.
+- id: WINNF.REL1Ext.FT.S.IPR.4
+  family: IPR
+  relation: replaces
+  baseline_case: WINNF.FT.S.IPR.4
+  section: 8.9.4.4
+  title: CBSD Grant Request in the Neighborhood of an Activated Inland DPA
+  requirements:
+  - REL1Ext-R2-SGN-02
+  - REL1Ext-R2-SGN-03
+  data_change: inland-always-on-or-activated-DPA-neighborhood-grants
+  calculation_change: inland-DPA-protection-with-Rel1Ext-propagation-factors
+  response_time_change: grant-response-constrained-by-inland-DPA-protection
+  local_tests:
+  - tests/unit/test_dpa_protection_ipr.py
+  - tests/unit/test_dpa_lifecycle.py
+  - tests/unit/test_iap_service.py
+  evidence: null
+  status: failing
+  notes: domain wired (protected channels / movelist / grant|heartbeat hooks). Official open — not claimed
+    PASS.
+- id: WINNF.REL1Ext.FT.S.IPR.5
+  family: IPR
+  relation: replaces
+  baseline_case: WINNF.FT.S.IPR.5
+  section: 8.9.4.5
+  title: Grants near inactive DPAs followed by DPA Activation
+  requirements:
+  - REL1Ext-R2-SGN-04
+  - REL1Ext-R2-SGN-05
+  data_change: 'Grants authorized while DPA inactive; later ESC/portal activation of the same DPA/channel
+    pair.
+
+    '
+  calculation_change: 'Re-evaluate movelist/aggregate after activation using Rel1Ext interference model.
+
+    '
+  response_time_change: 'Within configured post-activation window (e.g. 240 s heartbeat stage), grants
+    must be terminated/suspended as required to meet DPA criteria.
+
+    '
+  local_tests:
+  - tests/unit/test_dpa_protection_ipr.py
+  - tests/unit/test_dpa_lifecycle.py
+  - tests/unit/test_cpas_pipeline.py
+  - tests/unit/test_heartbeat_extended.py
+  evidence: null
+  status: failing
+  notes: domain wired (protected channels / movelist / grant|heartbeat hooks). Official open — not claimed
+    PASS.
+- id: WINNF.REL1Ext.FT.S.IPR.6
+  family: IPR
+  relation: replaces
+  baseline_case: WINNF.FT.S.IPR.6
+  section: 8.9.4.6
+  title: Broken connectivity between SAS UUT and ESC on all channels
+  requirements:
+  - REL1Ext-R2-SGN-06
+  data_change: ESC-loss-of-connectivity-on-all-monitored-channels
+  calculation_change: fail-closed-protect-affected-DPAs-as-if-active-or-unmonitored-per-spec
+  response_time_change: grant-heartbeat-enforcement-after-ESC-connectivity-loss
+  local_tests:
+  - tests/unit/test_dpa_protection_ipr.py
+  - tests/unit/test_cpas_pipeline.py
+  - tests/unit/test_dpa_lifecycle.py
+  evidence: null
+  status: failing
+  notes: domain wired (protected channels / movelist / grant|heartbeat hooks). Official open — not claimed
+    PASS.
+- id: WINNF.REL1Ext.FT.S.IPR.7
+  family: IPR
+  relation: replaces
+  baseline_case: WINNF.FT.S.IPR.7
+  section: 8.9.4.7
+  title: Activation of a Single DPA
+  requirements:
+  - REL1Ext-R2-SGN-02
+  data_change: single-DPA-channel-pair-activation-with-neighborhood-grant-mix
+  calculation_change: aggregate-interference-vs-TH-plus-margin-without-clutter-loading-focus
+  response_time_change: post-activation-heartbeat-stage-enforcement
+  local_tests:
+  - tests/unit/test_dpa_protection_ipr.py
+  - tests/unit/test_iap_service.py
+  - tests/unit/test_dpa_lifecycle.py
+  evidence: null
+  status: failing
+  notes: ': single-DPA evaluate + CPAS movelist. Official open — not claimed PASS.'
+- id: WINNF.REL1Ext.FT.S.IPR.8
+  family: IPR
+  relation: new
+  baseline_case: null
+  section: 8.9.4.8
+  title: Activation of a Single DPA with Clutter Loss and Network Loading
+  requirements:
+  - REL1Ext-R2-SGN-02
+  data_change: 'Single DPA activation with CBSD height cohorts (≤6 m / >6 m) inside/outside neighborhood
+    radii; CPAS then activate; heartbeat after 240 s.
+
+    '
+  calculation_change: 'Aggregate interference uses ITM median path loss modified by clutter (P.2108 for
+    ≤6 m AGL) and 8 dB network-loading factor toward DPA points.
+
+    '
+  response_time_change: 'After activation + 240 s, authorized grants in groups 1–6 must satisfy I_agg(a)
+    ≤ TH + Δ at each protection point/azimuth.
+
+    '
+  local_tests:
+  - tests/unit/test_dpa_protection_ipr.py
+  - tests/unit/test_propagation_service.py
+  - tests/unit/test_iap_service.py
+  evidence: null
+  status: failing
+  notes: ': Rel1Ext clutter≤6m + 8dB loading in DPA aggregate (IPR.8). Local greedy movelist is deterministic
+    only — not official Monte-Carlo/keep-move proof. Official open — not claimed PASS.'
+- id: WINNF.REL1Ext.FT.S.MCP.1
+  family: MCP
+  relation: replaces
+  baseline_case: WINNF.FT.S.MCP.1
+  section: 8.10.4.1
+  title: Mix of GAA and PAL grants 3550–3700 MHz protecting IAP entities and DPAs
+  requirements:
+  - REL1Ext-R2-SGN-02
+  - REL1Ext-R2-IPM-01
+  data_change: 'Simultaneous IAP-protected entities (FSS/GWPZ/PPA/ESC) plus DPAs; mix of GAA and PAL grants
+    across 3550–3700 MHz.
+
+    '
+  calculation_change: 'Multi-constraint IAP + DPA protection with Rel1Ext DPA propagation factors; peer
+    FAD contributions as applicable.
+
+    '
+  response_time_change: 'CPAS + grant/heartbeat outcomes must jointly satisfy all configured constraints.
+
+    '
+  local_tests:
+  - tests/unit/test_mcp_iap_dpa.py
+  - tests/unit/test_iap_service.py
+  - tests/unit/test_cpas_pipeline.py
+  - tests/unit/test_cpas_iap_wiring.py
+  evidence: compliance/evidence/C2_CPAS_IAP_PRODUCTION_WIRING.md
+  status: failing
+  notes: 'C2: production CPAS wires ProtectionPoints + ITM coupling without test kwargs; fail-closed when
+    entities present and coupling unavailable. Official Rel1Ext MCP.1 harness still open — not claimed
+    PASS.'
+- id: WINNF.REL1Ext.FT.S.BPR.1
+  family: BPR
+  relation: modifies
+  baseline_case: WINNF.FT.S.BPR.1
+  section: 8.13/8.15
+  title: Border protection updates referenced by Rel1Ext summary table
+  requirements:
+  - REL1Ext-R1-SGN-09
+  data_change: 'TS-4010 §5.5 lists Rel1Ext BPR.1 against baseline BPR.1 / §8.13–8.15; detailed procedure
+    body is thinner in the extracted V1.1.0 text — treat as requirement delta driven by TS-1020 REL1Ext-R1-SGN-09
+    until harness text is bound.
+
+    '
+  calculation_change: border-protection-rule-updates-per-REL1Ext-R1-SGN-09
+  response_time_change: none-identified-in-§5.5-beyond-requirement-pointer
+  local_tests:
+  - tests/unit/test_compliance_matrix.py
+  evidence: null
+  status: blocked
+  notes: 'Included for §5.5 completeness. Implementation deferred until BPR Rel1Ext procedure text is
+    bound to harness expectations (not in … primary path).
+
+    '

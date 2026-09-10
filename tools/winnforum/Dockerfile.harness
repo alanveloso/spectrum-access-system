@@ -1,0 +1,81 @@
+# Official WInnForum SAS test harness — reproducible runtime image.
+# NOT part of SAS production packaging.
+#
+# Build (from repo root):
+#   docker build -f tools/winnforum/Dockerfile.harness \
+#     --build-arg HARNESS_COMMIT=928c3150adf7b31e53a96b695bf1fbdd3284ecb2 \
+#     -t winnforum-sas-harness:928c3150 .
+#
+# Requires a clean harness source tree in build context:
+#   .cache/winnforum-harness-src/  (git archive of HARNESS_COMMIT)
+
+ARG HARNESS_COMMIT=928c3150adf7b31e53a96b695bf1fbdd3284ecb2
+
+FROM python:3.11-bookworm
+
+ARG HARNESS_COMMIT
+LABEL org.opencontainers.image.title="WInnForum SAS Test Harness"
+LABEL org.opencontainers.image.source="https://github.com/Wireless-Innovation-Forum/Spectrum-Access-System.git"
+LABEL winnforum.harness.commit="${HARNESS_COMMIT}"
+
+ENV DEBIAN_FRONTEND=noninteractive \
+    TZ=America/Los_Angeles \
+    HARNESS_HOME=/opt/winnforum-harness \
+    HARNESS_WORKDIR=/opt/winnforum-harness/src/harness \
+    HARNESS_COMMIT=${HARNESS_COMMIT} \
+    PYTHONDONTWRITEBYTECODE=1 \
+    PYTHONUNBUFFERED=1
+
+# Native build/runtime deps for Shapely 1.7.1, GDAL 3.3.2, pycurl, lxml.
+RUN apt-get update && apt-get install -y --no-install-recommends \
+    build-essential \
+    ca-certificates \
+    curl \
+    g++ \
+    git \
+    libcurl4-openssl-dev \
+    libgeos-dev \
+    libgdal-dev \
+    libssl-dev \
+    libxml2-dev \
+    libxslt1-dev \
+    tzdata \
+    && ln -snf /usr/share/zoneinfo/$TZ /etc/localtime \
+    && echo $TZ > /etc/timezone \
+    && rm -rf /var/lib/apt/lists/*
+
+WORKDIR /opt
+
+# Copy clean upstream harness source (byte-identical to HARNESS_COMMIT archive).
+COPY .cache/winnforum-harness-src/ /opt/winnforum-harness/
+
+WORKDIR ${HARNESS_WORKDIR}
+
+# Record provenance inside the image.
+RUN printf '%s\n' "${HARNESS_COMMIT}" > /opt/winnforum-harness/HARNESS_COMMIT \
+    && test -f /opt/winnforum-harness/requirements.txt
+
+# Install official Python dependencies exactly as pinned upstream.
+RUN python -m pip install --upgrade 'pip==24.0' setuptools wheel \
+    && pip install --no-cache-dir -r /opt/winnforum-harness/requirements.txt \
+    && pip install --no-cache-dir 'pytz==2024.1'
+
+# Build official harness RF reference extensions (ITM, eHata) required by BPR/GPR/etc.
+WORKDIR ${HARNESS_WORKDIR}/reference_models/propagation/itm
+RUN python setup.py build_ext -i
+WORKDIR ${HARNESS_WORKDIR}/reference_models/propagation/ehata
+RUN python setup.py build_ext -i
+WORKDIR ${HARNESS_WORKDIR}
+
+# SAS runner overlay (exec_unittest, openssl compat) — mounted at runtime from
+# the SAS repository; keep a placeholder for self-check import path tests.
+RUN mkdir -p /opt/sas-tools
+
+COPY tools/winnforum/harness_self_check.py /usr/local/bin/harness-self-check
+COPY tools/winnforum/harness_entrypoint.sh /usr/local/bin/harness-entrypoint
+RUN chmod +x /usr/local/bin/harness-entrypoint /usr/local/bin/harness-self-check
+
+WORKDIR ${HARNESS_WORKDIR}
+
+ENTRYPOINT ["/usr/local/bin/harness-entrypoint"]
+CMD ["self-check"]

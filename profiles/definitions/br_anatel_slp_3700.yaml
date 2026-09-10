@@ -1,0 +1,129 @@
+# Reference Spectrum Profile — ANATEL SLP terrestrial 3700–3800 MHz .
+# Traceability: compliance/anatel/slp_3700_3800_requirements_matrix.yaml
+# Not an ANATEL conformity claim. Zero profile-specific Python.
+#
+# Gaps deferred (see matrix / justification): indoor-over-outdoor priority (017),
+# TDD sync process (018), ACLR/OBUE (007), BDTA datasets (012–016).
+
+api_version: spectrum-access/v2
+kind: SpectrumProfile
+
+metadata:
+  id: br_anatel_slp_3700
+  version: "1.0.0"
+  status: reference
+  based_on: null
+  references:
+    - ATO_915_2024
+    - BR-SLP-3700-001
+    - BR-SLP-3700-002
+    - BR-SLP-3700-003
+    - BR-SLP-3700-004
+    - BR-SLP-3700-005
+    - BR-SLP-3700-006
+    - BR-SLP-3700-008
+    - BR-SLP-3700-009
+    - BR-SLP-3700-010
+    - BR-SLP-3700-011
+    - BR-SLP-3700-012
+    - BR-SLP-3700-019
+    - BR-SLP-3700-020
+    - BR-SLP-3700-021
+    - BR-SLP-3700-022
+    - BR-SLP-3700-023
+
+spectrum:
+ # Ato 915/2024 §5.13.1 / Tabela XII — F1=3700 MHz, BW=10 MHz, N=10
+  ranges:
+    - id: slp_3700_3800
+      low_hz: 3700000000
+      high_hz: 3800000000
+  channelization:
+    mechanism: fixed_width_channelization
+    width_hz: 10000000
+    origin_hz: 3700000000
+    role: assignment
+
+# D10 / BR-SLP-3700-020: classless regime — omit access (do not fake ordered_classes[1]).
+
+authorization:
+ # BR-SLP-3700-008 / 019 — local license style; no CBRS-like duration refresh
+  mechanism: static_authorization
+
+power:
+ # Ato 915/2024 §5.13.3 — PSD stated per 10 MHz; max_psd_dbm_mhz = X_dBm/10MHz - 10*log10(10)
+  mechanism: rule_table
+  rules:
+    - max_eirp_dbm: 30.0
+      max_psd_dbm_mhz: 20.0
+      indoor_outdoor: indoor
+      device_class: base_nodal
+    - max_eirp_dbm: 26.0
+      max_psd_dbm_mhz: 16.0
+      indoor_outdoor: outdoor
+      device_class: base_nodal
+    - max_eirp_dbm: 26.0
+      indoor_outdoor: indoor
+      device_class: terminal
+    - max_eirp_dbm: 26.0
+      indoor_outdoor: outdoor
+      device_class: terminal
+
+geography:
+ # BR-SLP-3700-008/009 — coverage limited to licensed property.
+ # Placeholder polygon only; replace with outorga geometry (not a real authorization).
+  mechanism: authorized_area
+  authorized_areas:
+    - id: license_property_placeholder
+      ring:
+        - [-47.9300, -15.7800]
+        - [-47.9290, -15.7800]
+        - [-47.9290, -15.7790]
+        - [-47.9300, -15.7790]
+        - [-47.9300, -15.7800]
+
+# No temporal.reevaluation — BR-SLP-3700-021 (no heartbeat keep-alive).
+
+protection:
+ # Distance/exclusion apply when BR entity datasets exist . No IAP RF stack required.
+  mechanisms:
+    - protection_entitlement
+    - channel_exclusion
+    - distance_exclusion
+    - exclusion_zone
+
+coordination:
+  mechanism: snapshot_evaluate_apply
+
+rf:
+ # Equipment masks are OUT_OF_SCOPE_EQUIP; path-loss IAP not mandated by §5.13 for this profile.
+  required: false
+  policy: path_loss_plus_aggregate
+
+data:
+ # BDTA / cadastral coexistence inputs — providers arrive in (fail closed at runtime).
+  required_capabilities:
+    - protected_entities
+    - boundaries
+
+requirements:
+  device_capabilities:
+    - geolocation
+    - frequency_range
+    - max_eirp
+
+constraints:
+ # reusable primitives (see compliance/anatel/slp_3700_3800_requirements_matrix.yaml)
+  - mechanism: duplex_mode
+    mode: tdd
+  - mechanism: max_assignment_bandwidth
+    max_bandwidth_hz: 50000000
+    indoor_outdoor: outdoor
+  - mechanism: antenna_height_limit
+    max_height_m: 6.0
+    indoor_outdoor: outdoor
+    device_class: base_nodal
+  - mechanism: forbidden_device_roles
+    roles:
+      - repeater
+      - booster

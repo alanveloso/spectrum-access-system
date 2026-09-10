@@ -1,0 +1,1315 @@
+version: 1
+cases:
+- id: FAMILY.REG
+  family: REG
+  case_scope: family
+  status: failing
+  implementation:
+  - services/registration_service.py
+  - services/cpi_signature.py
+  - services/blacklist_service.py
+  - routes/cbsd_routes.py
+  - schemas/registration.py
+  - schemas/common.py
+  - services/cbsd_batch.py
+  - services/terrain/haat.py
+  - services/terrain/ned.py
+  tests:
+  - tests/unit/test_cbsd_schemas.py
+  - tests/unit/test_cpi_signature.py
+  - tests/unit/test_registration_extended.py
+  - tests/contract/test_cbsd_schema_validation.py
+  - tests/contract/test_cbsd_version_dispatch.py
+  - tests/unit/test_haat_registration.py
+  - tests/unit/test_haat_general.py
+  - tests/unit/test_registration_no_fixture_hardcode.py
+  evidence: null
+  notes: CSV Parcial; CPI crypto local (); general HAAT + NED samples/tolerances are covered by the current local test suite.
+    PKI/SCS abertos.
+- id: FAMILY.SIQ
+  family: SIQ
+  case_scope: family
+  status: failing
+  implementation:
+  - services/spectrum_inquiry_service.py
+  - schemas/spectrum_inquiry.py
+  - schemas/common.py
+  tests:
+  - tests/unit/test_cbsd_schemas.py
+  evidence: null
+  notes: 'CSV Parcial ~55%; RF validation simplified.: FrequencyRange + inquiredSpectrum cardinality.'
+- id: FAMILY.GRA
+  family: GRA
+  case_scope: family
+  status: failing
+  implementation:
+  - services/grant_service.py
+  - schemas/grant.py
+  - schemas/common.py
+  - services/iap/engine.py
+  - services/iap/aggregate.py
+  tests:
+  - tests/unit/test_cbsd_schemas.py
+  - tests/unit/test_iap_service.py
+  evidence: null
+  notes: CSV Parcial ~55%; IAP engine local (injectable coupling). Official harness GRA/IAP PASS still
+    open. renew; locks.
+- id: FAMILY.HBT
+  family: HBT
+  case_scope: family
+  status: failing
+  implementation:
+  - services/heartbeat_service.py
+  - schemas/heartbeat.py
+  - schemas/common.py
+  tests:
+  - tests/unit/test_cbsd_schemas.py
+  - tests/contract/test_cbsd_schema_validation.py
+  evidence: null
+  notes: CSV Parcial ~55%; … lifecycle/renew/locks. Rel1Ext TxExpire DPA-neighborhood (HBT.13) is covered locally; official Rel1Ext HBT harness evidence remains open.
+- id: WINNF.FT.S.HBT.3
+  family: HBT
+  case_scope: case
+  status: failing
+  implementation:
+  - services/cbsd_version.py
+  - routes/cbsd_version_routes.py
+  - services/heartbeat_service.py
+  - schemas/heartbeat.py
+  tests:
+  - tests/contract/test_cbsd_version_dispatch.py
+  - tests/unit/test_cbsd_version.py
+  evidence: null
+  notes: Unsupported-version path unified in (responseCode 100 + past transmitExpireTime). Official harness
+    evidence still pending.
+- id: FAMILY.RLQ
+  family: RLQ
+  case_scope: family
+  status: failing
+  implementation:
+  - services/relinquishment_service.py
+  - schemas/relinquishment.py
+  tests:
+  - tests/unit/test_cbsd_schemas.py
+  evidence: null
+  notes: CSV Parcial ~60%. … cert-under-lock/lifecycle/serialized RLQ.
+- id: FAMILY.DRG
+  family: DRG
+  case_scope: family
+  status: failing
+  implementation:
+  - services/deregistration_service.py
+  - schemas/deregistration.py
+  tests:
+  - tests/unit/test_cbsd_schemas.py
+  evidence: null
+  notes: CSV Parcial ~60%; // cert-under-lock/lifecycle/CBSD lock.
+- id: FAMILY.FAD
+  family: FAD
+  case_scope: family
+  status: failing
+  implementation:
+  - services/fad_service.py
+  - services/fad_client_service.py
+  - routes/sas_sas_routes.py
+  tests:
+  - tests/unit/test_fad_server.py
+  - tests/unit/test_fad_client.py
+  - tests/unit/test_multi_sas.py
+  evidence: compliance/evidence/winnforum_fad_harness.md
+  notes: Family rollup; case-level PASS in WINNF.FT.S.FAD.1/.2 (harness final 3x). Local FAD coverage retained.
+- id: FAMILY.SSS
+  family: SSS
+  case_scope: family
+  status: failing
+  implementation:
+  - services/mtls_auth.py
+  - services/certificate_policy.py
+  - services/tls_matrix.py
+  - tools/winnforum/openssl_compat.py
+  - main.py
+  tests:
+  - tests/security/test_certs_and_doctor.py
+  - tests/security/test_tls_matrix.py
+  - tests/unit/test_certificate_policy.py
+  - tests/unit/test_openssl_compat.py
+  evidence: compliance/evidence/winnforum_scs_sds_sss_harness.md
+  notes: Family rollup; case-level PASS in WINNF.FT.S.SSS.* ( harness 56 OK). Requires SAS_ADMIN_CERT_SHA1
+    + openssl_compat.
+- id: FAMILY.EXZ
+  family: EXZ
+  case_scope: family
+  status: failing
+  implementation:
+  - services/exclusion_zone_service.py
+  - services/iap/pre_iap_exclusions.py
+  - services/iap/protection_points.py
+  - services/cpas_service.py
+  - services/grant_service.py
+  - services/spectrum_inquiry_service.py
+  tests:
+  - tests/unit/test_cpas_exclusion_zone_esc.py
+  - tests/unit/test_grant_pal_ppa.py
+  evidence: compliance/evidence/C4_EXZ_EPR.md
+  notes: 'C4: EXZ freeze + pre-IAP CPAS terminate + admission/SIQ/HBT. NTIA enable fail-closed without
+    KML (BLOCKED_BY_DATASET). implemented + production wired; official validation pending (NOT_RUN).'
+- id: FAMILY.BPR
+  family: BPR
+  case_scope: family
+  status: failing
+  implementation:
+  - services/border_protection.py
+  tests: []
+  evidence: null
+  notes: CSV Parcial ~40%; Rel1Ext BPR.1 delta listed in compliance/rel1ext_delta.yaml (blocked pending
+    procedure bind).
+- id: FAMILY.EPR
+  family: EPR
+  case_scope: family
+  status: failing
+  implementation:
+  - services/iap/protection_points.py
+  - services/esc_admin_service.py
+  - services/cpas_service.py
+  - services/mcp_protection.py
+  - services/heartbeat_service.py
+  - services/dpa_protection.py
+  tests:
+  - tests/unit/test_cpas_exclusion_zone_esc.py
+  - tests/unit/test_mcp_iap_dpa.py
+  evidence: compliance/evidence/C4_EXZ_EPR.md
+  notes: 'C4: ESC ProtectionPoints + frozen connectivity + peer ESC IAP points + multi-SAS peer grants.
+    DPA/IPR disconnect semantics preserved. implemented + production wired; official validation pending
+    (NOT_RUN). QPR/WDB/PCR/FDB → C5.'
+- id: FAMILY.QPR
+  family: QPR
+  case_scope: family
+  status: failing
+  implementation:
+  - services/quiet_zone_service.py
+  - services/registration_service.py
+  - services/grant_service.py
+  - services/iap/pre_iap_exclusions.py
+  tests:
+  - tests/unit/test_quiet_zone_sync_ppa_federal.py
+  - tests/unit/test_registration_extended.py
+  evidence: compliance/evidence/C5_QPR_WDB_PCR_FDB.md
+  notes: 'C5: QPR.2 NRQZ + FCC Cat A 2.4/Cat B 4.8 + Table Mountain + configurable areas; reg/grant/CPAS
+    pre-IAP. implemented + production wired; official validation pending (NOT_RUN).'
+- id: FAMILY.WDB
+  family: WDB
+  case_scope: family
+  status: failing
+  implementation:
+  - services/database_sync_service.py
+  - services/pal_service.py
+  - services/cpas_reevaluation.py
+  tests:
+  - tests/unit/test_quiet_zone_sync_ppa_federal.py
+  - tests/unit/test_data_injection.py
+  evidence: compliance/evidence/C5_QPR_WDB_PCR_FDB.md
+  notes: 'C5: PAL full-replace + CPI reconcile + optional checksum + N/N+1 reevaluation flag. implemented
+    + production wired; official validation pending (NOT_RUN).'
+- id: FAMILY.FDB
+  family: FDB
+  case_scope: family
+  status: failing
+  implementation:
+  - services/federal_db_service.py
+  - services/cpas_service.py
+  - services/cpas_schedule_service.py
+  tests:
+  - tests/unit/test_cpas_execution_mode.py
+  - tests/unit/test_cpas_schedule.py
+  - tests/unit/test_cpas_pipeline.py
+  - tests/unit/test_multi_sas.py
+  evidence: compliance/evidence/winnforum_fad_harness.md
+  notes: 'CPAS/scheduler local+FAD.2 OK. C2–C4 EXZ/FSS/GWBL/ESC on CPAS. C5: scheduled DPA materializes
+    activations+movelist; freeze includes scheduled_dpa/dpa_activation; post-sync reevaluation flag. Official
+    FDB.1–6/8 still NOT_RUN / BLOCKED_BY_ENV. Not claimed PASS.'
+- id: FAMILY.SCS
+  family: SCS
+  case_scope: family
+  status: failing
+  implementation:
+  - services/mtls_auth.py
+  - services/certificate_policy.py
+  - services/cbsd_auth.py
+  - services/tls_matrix.py
+  - tools/winnforum/openssl_compat.py
+  tests:
+  - tests/security/test_certs_and_doctor.py
+  - tests/security/test_tls_matrix.py
+  - tests/unit/test_certificate_policy.py
+  - tests/unit/test_cbsd_auth.py
+  - tests/unit/test_openssl_compat.py
+  evidence: compliance/evidence/winnforum_scs_sds_sss_harness.md
+  notes: Family rollup; case-level PASS in WINNF.FT.S.SCS.* ( harness 56 OK). Requires SAS_ADMIN_CERT_SHA1
+    + openssl_compat.
+- id: FAMILY.SDS
+  family: SDS
+  case_scope: family
+  status: failing
+  implementation:
+  - services/mtls_auth.py
+  - services/certificate_policy.py
+  - services/cbsd_auth.py
+  - services/tls_matrix.py
+  - tools/winnforum/openssl_compat.py
+  tests:
+  - tests/security/test_tls_matrix.py
+  - tests/unit/test_certificate_policy.py
+  - tests/unit/test_cbsd_auth.py
+  - tests/unit/test_openssl_compat.py
+  evidence: compliance/evidence/winnforum_scs_sds_sss_harness.md
+  notes: Family rollup; case-level PASS in WINNF.FT.S.SDS.* ( harness 56 OK). Requires SAS_ADMIN_CERT_SHA1
+    + openssl_compat.
+- id: FAMILY.GPR
+  family: GPR
+  case_scope: family
+  status: untested
+  implementation:
+  - services/iap/protection_points.py
+  - services/iap/pre_iap_exclusions.py
+  - services/iap/engine.py
+  - services/cpas_service.py
+  - services/mcp_protection.py
+  tests:
+  - tests/unit/test_cpas_gwpz_ppa_fss_protection.py
+  evidence: compliance/evidence/C3_GPR_PPR_FPR.md
+  notes: 'C3: GWPZ aggregate IAP + EZ purge + multi-SAS peer RF on production CPAS path. implemented +
+    production wired; official validation pending (NOT_RUN).'
+- id: FAMILY.PCR
+  family: PCR
+  case_scope: family
+  status: failing
+  implementation:
+  - routes/admin_routes.py
+  - services/ppa_service.py
+  - services/ppa_rf_contour.py
+  - services/pal_service.py
+  tests:
+  - tests/unit/test_quiet_zone_sync_ppa_federal.py
+  - tests/unit/test_ppa_rf_contour.py
+  - tests/unit/test_ppa_creation.py
+  - tests/unit/test_geometry_overlap.py
+  evidence: compliance/evidence/C5_QPR_WDB_PCR_FDB.md
+  notes: 'C5: RF maximum PPA contour (−96 dBm/10 MHz hybrid) + claimedBoundary ⊆ RF max + SA/census clip;
+    no hull RF substitute. implemented + production wired; official validation pending (NOT_RUN). Harness
+    ITM/shapely often BLOCKED_BY_ENV.'
+- id: FAMILY.PAT
+  family: PAT
+  case_scope: family
+  status: failing
+  implementation:
+  - routes/admin_routes.py
+  - services/propagation/service.py
+  - services/propagation/engines.py
+  - protection_data/loader.py
+  - protection_data/schema.py
+  tests:
+  - tests/contract/test_admin_no_catchall.py
+  - tests/unit/test_protection_data.py
+  - tests/unit/test_propagation_service.py
+  - tests/unit/test_rel1ext_pat2.py
+  evidence: null
+  notes: Admin API + Rel1Ext Type-3 UUT clutter/loading composition. Official PAT.2 harness still open
+    / BLOCKED_BY_ENV. Not claimed PASS.
+- id: FAMILY.IPR
+  family: IPR
+  case_scope: family
+  status: failing
+  implementation:
+  - services/iap/engine.py
+  - services/iap/aggregate.py
+  - services/iap/models.py
+  - services/cpas_service.py
+  - services/dpa_protection.py
+  - services/esc_admin_service.py
+  tests:
+  - tests/unit/test_iap_service.py
+  - tests/unit/test_cpas_pipeline.py
+  - tests/unit/test_dpa_protection_ipr.py
+  - tests/unit/test_dpa_lifecycle.py
+  evidence: null
+  notes: IAP + Rel1Ext DPA protection domain (list protected / movelist / clutter+loading / ESC absent).
+    Official IPR harness still open / BLOCKED_BY_ENV. Not claimed PASS.
+- id: FAMILY.PPR
+  family: PPR
+  case_scope: family
+  status: untested
+  implementation:
+  - services/iap/protection_points.py
+  - services/cpas_service.py
+  - services/pal_service.py
+  tests:
+  - tests/unit/test_cpas_gwpz_ppa_fss_protection.py
+  evidence: compliance/evidence/C3_GPR_PPR_FPR.md
+  notes: 'C3: PPA aggregate IAP with frozen PAL freqs; non-PPA zones excluded (). implemented + production
+    wired; official validation pending (NOT_RUN).'
+- id: FAMILY.FPR
+  family: FPR
+  case_scope: family
+  status: untested
+  implementation:
+  - services/iap/protection_points.py
+  - services/iap/pre_iap_exclusions.py
+  - services/iap/models.py
+  - services/cpas_service.py
+  - services/federal_db_service.py
+  tests:
+  - tests/unit/test_cpas_gwpz_ppa_fss_protection.py
+  evidence: compliance/evidence/C3_GPR_PPR_FPR.md
+  notes: 'C3: FSS_COCHANNEL + FSS_BLOCKING + TTC + GWBL pre-IAP EZ on CPAS path. implemented + production
+    wired; official validation pending (NOT_RUN). EXZ/EPR residual → C4; QPR/WDB/PCR/FDB → C5.'
+- id: FAMILY.MCP
+  family: MCP
+  case_scope: family
+  status: failing
+  implementation:
+  - services/mcp_protection.py
+  - services/iap/protection_points.py
+  - services/iap/coupling.py
+  - services/cpas_service.py
+  - services/dpa_protection.py
+  - services/iap/engine.py
+  tests:
+  - tests/unit/test_mcp_iap_dpa.py
+  - tests/unit/test_iap_service.py
+  - tests/unit/test_cpas_pipeline.py
+  - tests/unit/test_cpas_iap_wiring.py
+  evidence: compliance/evidence/C2_CPAS_IAP_PRODUCTION_WIRING.md
+  notes: C2 production CPAS→IAP wiring (frozen protection_records + make_production_iap_coupling; test
+    kwargs override). Official Rel1Ext MCP.1 still open / BLOCKED_BY_ENV. Not claimed PASS.
+- id: FAMILY.MES
+  family: MES
+  case_scope: family
+  status: failing
+  implementation:
+  - services/registration_service.py
+  - routes/cbsd_routes.py
+  tests:
+  - tests/unit/test_esc_meas_admin.py
+  evidence: null
+  notes: Measurement-report configuration during registration/grant; official WINNF_FT_S_MES_* applicable.
+- id: WINNF.FT.S.FAD.1
+  family: FAD
+  case_scope: case
+  status: passing
+  implementation:
+  - services/fad_service.py
+  - routes/sas_sas_routes.py
+  tests:
+  - tests/unit/test_fad_server.py
+  evidence: compliance/evidence/winnforum_fad_harness.md
+  notes: Harness OK 2026-08-07 gate final ×3; test_WINNF_FT_S_FAD_1.
+- id: WINNF.FT.S.FAD.2
+  family: FAD
+  case_scope: case
+  status: passing
+  implementation:
+  - services/fad_service.py
+  - services/fad_client_service.py
+  - services/cpas_service.py
+  - routes/sas_sas_routes.py
+  tests:
+  - tests/unit/test_fad_client.py
+  - tests/unit/test_multi_sas.py
+  evidence: compliance/evidence/winnforum_fad_harness.md
+  notes: Harness OK 2026-08-07 gate final ×3; empty coordination omitted OK; test_WINNF_FT_S_FAD_2.
+- id: WINNF.FT.S.SCS.1
+  family: SCS
+  case_scope: case
+  status: passing
+  implementation:
+  - services/mtls_auth.py
+  - services/certificate_policy.py
+  - services/cbsd_auth.py
+  - services/tls_matrix.py
+  - tools/winnforum/openssl_compat.py
+  tests:
+  - tests/security/test_tls_matrix.py
+  - tests/unit/test_certificate_policy.py
+  - tests/unit/test_openssl_compat.py
+  evidence: compliance/evidence/winnforum_scs_sds_sss_harness.md
+  notes: Harness OK 2026-08-07 gate verify; test_WINNF_FT_S_SCS_1.
+- id: WINNF.FT.S.SCS.2
+  family: SCS
+  case_scope: case
+  status: passing
+  implementation:
+  - services/mtls_auth.py
+  - services/certificate_policy.py
+  - services/cbsd_auth.py
+  - services/tls_matrix.py
+  - tools/winnforum/openssl_compat.py
+  tests:
+  - tests/security/test_tls_matrix.py
+  - tests/unit/test_certificate_policy.py
+  - tests/unit/test_openssl_compat.py
+  evidence: compliance/evidence/winnforum_scs_sds_sss_harness.md
+  notes: Harness OK 2026-08-07 gate verify; test_WINNF_FT_S_SCS_2.
+- id: WINNF.FT.S.SCS.3
+  family: SCS
+  case_scope: case
+  status: passing
+  implementation:
+  - services/mtls_auth.py
+  - services/certificate_policy.py
+  - services/cbsd_auth.py
+  - services/tls_matrix.py
+  - tools/winnforum/openssl_compat.py
+  tests:
+  - tests/security/test_tls_matrix.py
+  - tests/unit/test_certificate_policy.py
+  - tests/unit/test_openssl_compat.py
+  evidence: compliance/evidence/winnforum_scs_sds_sss_harness.md
+  notes: Harness OK 2026-08-07 gate verify; test_WINNF_FT_S_SCS_3.
+- id: WINNF.FT.S.SCS.4
+  family: SCS
+  case_scope: case
+  status: passing
+  implementation:
+  - services/mtls_auth.py
+  - services/certificate_policy.py
+  - services/cbsd_auth.py
+  - services/tls_matrix.py
+  - tools/winnforum/openssl_compat.py
+  tests:
+  - tests/security/test_tls_matrix.py
+  - tests/unit/test_certificate_policy.py
+  - tests/unit/test_openssl_compat.py
+  evidence: compliance/evidence/winnforum_scs_sds_sss_harness.md
+  notes: Harness OK 2026-08-07 gate verify; test_WINNF_FT_S_SCS_4.
+- id: WINNF.FT.S.SCS.5
+  family: SCS
+  case_scope: case
+  status: passing
+  implementation:
+  - services/mtls_auth.py
+  - services/certificate_policy.py
+  - services/cbsd_auth.py
+  - services/tls_matrix.py
+  - tools/winnforum/openssl_compat.py
+  tests:
+  - tests/security/test_tls_matrix.py
+  - tests/unit/test_certificate_policy.py
+  - tests/unit/test_openssl_compat.py
+  evidence: compliance/evidence/winnforum_scs_sds_sss_harness.md
+  notes: Harness OK 2026-08-07 gate verify; test_WINNF_FT_S_SCS_5.
+- id: WINNF.FT.S.SCS.6
+  family: SCS
+  case_scope: case
+  status: passing
+  implementation:
+  - services/mtls_auth.py
+  - services/certificate_policy.py
+  - services/cbsd_auth.py
+  - services/tls_matrix.py
+  - tools/winnforum/openssl_compat.py
+  tests:
+  - tests/security/test_tls_matrix.py
+  - tests/unit/test_certificate_policy.py
+  - tests/unit/test_openssl_compat.py
+  evidence: compliance/evidence/winnforum_scs_sds_sss_harness.md
+  notes: Harness OK 2026-08-07 gate verify; test_WINNF_FT_S_SCS_6.
+- id: WINNF.FT.S.SCS.7
+  family: SCS
+  case_scope: case
+  status: passing
+  implementation:
+  - services/mtls_auth.py
+  - services/certificate_policy.py
+  - services/cbsd_auth.py
+  - services/tls_matrix.py
+  - tools/winnforum/openssl_compat.py
+  tests:
+  - tests/security/test_tls_matrix.py
+  - tests/unit/test_certificate_policy.py
+  - tests/unit/test_openssl_compat.py
+  evidence: compliance/evidence/winnforum_scs_sds_sss_harness.md
+  notes: Harness OK 2026-08-07 gate verify; test_WINNF_FT_S_SCS_7.
+- id: WINNF.FT.S.SCS.8
+  family: SCS
+  case_scope: case
+  status: passing
+  implementation:
+  - services/mtls_auth.py
+  - services/certificate_policy.py
+  - services/cbsd_auth.py
+  - services/tls_matrix.py
+  - tools/winnforum/openssl_compat.py
+  tests:
+  - tests/security/test_tls_matrix.py
+  - tests/unit/test_certificate_policy.py
+  - tests/unit/test_openssl_compat.py
+  evidence: compliance/evidence/winnforum_scs_sds_sss_harness.md
+  notes: Harness OK 2026-08-07 gate verify; test_WINNF_FT_S_SCS_8.
+- id: WINNF.FT.S.SCS.9
+  family: SCS
+  case_scope: case
+  status: passing
+  implementation:
+  - services/mtls_auth.py
+  - services/certificate_policy.py
+  - services/cbsd_auth.py
+  - services/tls_matrix.py
+  - tools/winnforum/openssl_compat.py
+  tests:
+  - tests/security/test_tls_matrix.py
+  - tests/unit/test_certificate_policy.py
+  - tests/unit/test_openssl_compat.py
+  evidence: compliance/evidence/winnforum_scs_sds_sss_harness.md
+  notes: Harness OK 2026-08-07 gate verify; test_WINNF_FT_S_SCS_9.
+- id: WINNF.FT.S.SCS.10
+  family: SCS
+  case_scope: case
+  status: passing
+  implementation:
+  - services/mtls_auth.py
+  - services/certificate_policy.py
+  - services/cbsd_auth.py
+  - services/tls_matrix.py
+  - tools/winnforum/openssl_compat.py
+  tests:
+  - tests/security/test_tls_matrix.py
+  - tests/unit/test_certificate_policy.py
+  - tests/unit/test_openssl_compat.py
+  evidence: compliance/evidence/winnforum_scs_sds_sss_harness.md
+  notes: Harness OK 2026-08-07 gate verify; test_WINNF_FT_S_SCS_10.
+- id: WINNF.FT.S.SCS.11
+  family: SCS
+  case_scope: case
+  status: passing
+  implementation:
+  - services/mtls_auth.py
+  - services/certificate_policy.py
+  - services/cbsd_auth.py
+  - services/tls_matrix.py
+  - tools/winnforum/openssl_compat.py
+  tests:
+  - tests/security/test_tls_matrix.py
+  - tests/unit/test_certificate_policy.py
+  - tests/unit/test_openssl_compat.py
+  evidence: compliance/evidence/winnforum_scs_sds_sss_harness.md
+  notes: Harness OK 2026-08-07 gate verify; test_WINNF_FT_S_SCS_11.
+- id: WINNF.FT.S.SCS.12
+  family: SCS
+  case_scope: case
+  status: passing
+  implementation:
+  - services/mtls_auth.py
+  - services/certificate_policy.py
+  - services/cbsd_auth.py
+  - services/tls_matrix.py
+  - tools/winnforum/openssl_compat.py
+  tests:
+  - tests/security/test_tls_matrix.py
+  - tests/unit/test_certificate_policy.py
+  - tests/unit/test_openssl_compat.py
+  evidence: compliance/evidence/winnforum_scs_sds_sss_harness.md
+  notes: Harness OK 2026-08-07 gate verify; test_WINNF_FT_S_SCS_12.
+- id: WINNF.FT.S.SCS.13
+  family: SCS
+  case_scope: case
+  status: passing
+  implementation:
+  - services/mtls_auth.py
+  - services/certificate_policy.py
+  - services/cbsd_auth.py
+  - services/tls_matrix.py
+  - tools/winnforum/openssl_compat.py
+  tests:
+  - tests/security/test_tls_matrix.py
+  - tests/unit/test_certificate_policy.py
+  - tests/unit/test_openssl_compat.py
+  evidence: compliance/evidence/winnforum_scs_sds_sss_harness.md
+  notes: Harness OK 2026-08-07 gate verify; test_WINNF_FT_S_SCS_13.
+- id: WINNF.FT.S.SCS.14
+  family: SCS
+  case_scope: case
+  status: passing
+  implementation:
+  - services/mtls_auth.py
+  - services/certificate_policy.py
+  - services/cbsd_auth.py
+  - services/tls_matrix.py
+  - tools/winnforum/openssl_compat.py
+  tests:
+  - tests/security/test_tls_matrix.py
+  - tests/unit/test_certificate_policy.py
+  - tests/unit/test_openssl_compat.py
+  evidence: compliance/evidence/winnforum_scs_sds_sss_harness.md
+  notes: Harness OK 2026-08-07 gate verify; test_WINNF_FT_S_SCS_14.
+- id: WINNF.FT.S.SCS.15
+  family: SCS
+  case_scope: case
+  status: passing
+  implementation:
+  - services/mtls_auth.py
+  - services/certificate_policy.py
+  - services/cbsd_auth.py
+  - services/tls_matrix.py
+  - tools/winnforum/openssl_compat.py
+  tests:
+  - tests/security/test_tls_matrix.py
+  - tests/unit/test_certificate_policy.py
+  - tests/unit/test_openssl_compat.py
+  evidence: compliance/evidence/winnforum_scs_sds_sss_harness.md
+  notes: Harness OK 2026-08-07 gate verify; test_WINNF_FT_S_SCS_15.
+- id: WINNF.FT.S.SCS.16
+  family: SCS
+  case_scope: case
+  status: passing
+  implementation:
+  - services/mtls_auth.py
+  - services/certificate_policy.py
+  - services/cbsd_auth.py
+  - services/tls_matrix.py
+  - tools/winnforum/openssl_compat.py
+  tests:
+  - tests/security/test_tls_matrix.py
+  - tests/unit/test_certificate_policy.py
+  - tests/unit/test_openssl_compat.py
+  evidence: compliance/evidence/winnforum_scs_sds_sss_harness.md
+  notes: Harness OK 2026-08-07 gate verify; test_WINNF_FT_S_SCS_16.
+- id: WINNF.FT.S.SCS.17
+  family: SCS
+  case_scope: case
+  status: passing
+  implementation:
+  - services/mtls_auth.py
+  - services/certificate_policy.py
+  - services/cbsd_auth.py
+  - services/tls_matrix.py
+  - tools/winnforum/openssl_compat.py
+  tests:
+  - tests/security/test_tls_matrix.py
+  - tests/unit/test_certificate_policy.py
+  - tests/unit/test_openssl_compat.py
+  evidence: compliance/evidence/winnforum_scs_sds_sss_harness.md
+  notes: Harness OK 2026-08-07 gate verify; test_WINNF_FT_S_SCS_17.
+- id: WINNF.FT.S.SCS.18
+  family: SCS
+  case_scope: case
+  status: passing
+  implementation:
+  - services/mtls_auth.py
+  - services/certificate_policy.py
+  - services/cbsd_auth.py
+  - services/tls_matrix.py
+  - tools/winnforum/openssl_compat.py
+  tests:
+  - tests/security/test_tls_matrix.py
+  - tests/unit/test_certificate_policy.py
+  - tests/unit/test_openssl_compat.py
+  evidence: compliance/evidence/winnforum_scs_sds_sss_harness.md
+  notes: Harness OK 2026-08-07 gate verify; test_WINNF_FT_S_SCS_18.
+- id: WINNF.FT.S.SCS.19
+  family: SCS
+  case_scope: case
+  status: passing
+  implementation:
+  - services/mtls_auth.py
+  - services/certificate_policy.py
+  - services/cbsd_auth.py
+  - services/tls_matrix.py
+  - tools/winnforum/openssl_compat.py
+  tests:
+  - tests/security/test_tls_matrix.py
+  - tests/unit/test_certificate_policy.py
+  - tests/unit/test_openssl_compat.py
+  evidence: compliance/evidence/winnforum_scs_sds_sss_harness.md
+  notes: Harness OK 2026-08-07 gate verify; test_WINNF_FT_S_SCS_19.
+- id: WINNF.FT.S.SDS.1
+  family: SDS
+  case_scope: case
+  status: passing
+  implementation:
+  - services/mtls_auth.py
+  - services/certificate_policy.py
+  - services/cbsd_auth.py
+  - services/tls_matrix.py
+  - tools/winnforum/openssl_compat.py
+  tests:
+  - tests/security/test_tls_matrix.py
+  - tests/unit/test_certificate_policy.py
+  - tests/unit/test_openssl_compat.py
+  evidence: compliance/evidence/winnforum_scs_sds_sss_harness.md
+  notes: Harness OK 2026-08-07 gate verify; test_WINNF_FT_S_SDS_1.
+- id: WINNF.FT.S.SDS.2
+  family: SDS
+  case_scope: case
+  status: passing
+  implementation:
+  - services/mtls_auth.py
+  - services/certificate_policy.py
+  - services/cbsd_auth.py
+  - services/tls_matrix.py
+  - tools/winnforum/openssl_compat.py
+  tests:
+  - tests/security/test_tls_matrix.py
+  - tests/unit/test_certificate_policy.py
+  - tests/unit/test_openssl_compat.py
+  evidence: compliance/evidence/winnforum_scs_sds_sss_harness.md
+  notes: Harness OK 2026-08-07 gate verify; test_WINNF_FT_S_SDS_2.
+- id: WINNF.FT.S.SDS.3
+  family: SDS
+  case_scope: case
+  status: passing
+  implementation:
+  - services/mtls_auth.py
+  - services/certificate_policy.py
+  - services/cbsd_auth.py
+  - services/tls_matrix.py
+  - tools/winnforum/openssl_compat.py
+  tests:
+  - tests/security/test_tls_matrix.py
+  - tests/unit/test_certificate_policy.py
+  - tests/unit/test_openssl_compat.py
+  evidence: compliance/evidence/winnforum_scs_sds_sss_harness.md
+  notes: Harness OK 2026-08-07 gate verify; test_WINNF_FT_S_SDS_3.
+- id: WINNF.FT.S.SDS.4
+  family: SDS
+  case_scope: case
+  status: passing
+  implementation:
+  - services/mtls_auth.py
+  - services/certificate_policy.py
+  - services/cbsd_auth.py
+  - services/tls_matrix.py
+  - tools/winnforum/openssl_compat.py
+  tests:
+  - tests/security/test_tls_matrix.py
+  - tests/unit/test_certificate_policy.py
+  - tests/unit/test_openssl_compat.py
+  evidence: compliance/evidence/winnforum_scs_sds_sss_harness.md
+  notes: Harness OK 2026-08-07 gate verify; test_WINNF_FT_S_SDS_4.
+- id: WINNF.FT.S.SDS.5
+  family: SDS
+  case_scope: case
+  status: passing
+  implementation:
+  - services/mtls_auth.py
+  - services/certificate_policy.py
+  - services/cbsd_auth.py
+  - services/tls_matrix.py
+  - tools/winnforum/openssl_compat.py
+  tests:
+  - tests/security/test_tls_matrix.py
+  - tests/unit/test_certificate_policy.py
+  - tests/unit/test_openssl_compat.py
+  evidence: compliance/evidence/winnforum_scs_sds_sss_harness.md
+  notes: Harness OK 2026-08-07 gate verify; test_WINNF_FT_S_SDS_5.
+- id: WINNF.FT.S.SDS.6
+  family: SDS
+  case_scope: case
+  status: passing
+  implementation:
+  - services/mtls_auth.py
+  - services/certificate_policy.py
+  - services/cbsd_auth.py
+  - services/tls_matrix.py
+  - tools/winnforum/openssl_compat.py
+  tests:
+  - tests/security/test_tls_matrix.py
+  - tests/unit/test_certificate_policy.py
+  - tests/unit/test_openssl_compat.py
+  evidence: compliance/evidence/winnforum_scs_sds_sss_harness.md
+  notes: Harness OK 2026-08-07 gate verify; test_WINNF_FT_S_SDS_6.
+- id: WINNF.FT.S.SDS.7
+  family: SDS
+  case_scope: case
+  status: passing
+  implementation:
+  - services/mtls_auth.py
+  - services/certificate_policy.py
+  - services/cbsd_auth.py
+  - services/tls_matrix.py
+  - tools/winnforum/openssl_compat.py
+  tests:
+  - tests/security/test_tls_matrix.py
+  - tests/unit/test_certificate_policy.py
+  - tests/unit/test_openssl_compat.py
+  evidence: compliance/evidence/winnforum_scs_sds_sss_harness.md
+  notes: Harness OK 2026-08-07 gate verify; test_WINNF_FT_S_SDS_7.
+- id: WINNF.FT.S.SDS.8
+  family: SDS
+  case_scope: case
+  status: passing
+  implementation:
+  - services/mtls_auth.py
+  - services/certificate_policy.py
+  - services/cbsd_auth.py
+  - services/tls_matrix.py
+  - tools/winnforum/openssl_compat.py
+  tests:
+  - tests/security/test_tls_matrix.py
+  - tests/unit/test_certificate_policy.py
+  - tests/unit/test_openssl_compat.py
+  evidence: compliance/evidence/winnforum_scs_sds_sss_harness.md
+  notes: Harness OK 2026-08-07 gate verify; test_WINNF_FT_S_SDS_8.
+- id: WINNF.FT.S.SDS.9
+  family: SDS
+  case_scope: case
+  status: passing
+  implementation:
+  - services/mtls_auth.py
+  - services/certificate_policy.py
+  - services/cbsd_auth.py
+  - services/tls_matrix.py
+  - tools/winnforum/openssl_compat.py
+  tests:
+  - tests/security/test_tls_matrix.py
+  - tests/unit/test_certificate_policy.py
+  - tests/unit/test_openssl_compat.py
+  evidence: compliance/evidence/winnforum_scs_sds_sss_harness.md
+  notes: Harness OK 2026-08-07 gate verify; test_WINNF_FT_S_SDS_9.
+- id: WINNF.FT.S.SDS.10
+  family: SDS
+  case_scope: case
+  status: passing
+  implementation:
+  - services/mtls_auth.py
+  - services/certificate_policy.py
+  - services/cbsd_auth.py
+  - services/tls_matrix.py
+  - tools/winnforum/openssl_compat.py
+  tests:
+  - tests/security/test_tls_matrix.py
+  - tests/unit/test_certificate_policy.py
+  - tests/unit/test_openssl_compat.py
+  evidence: compliance/evidence/winnforum_scs_sds_sss_harness.md
+  notes: Harness OK 2026-08-07 gate verify; test_WINNF_FT_S_SDS_10.
+- id: WINNF.FT.S.SDS.11
+  family: SDS
+  case_scope: case
+  status: passing
+  implementation:
+  - services/mtls_auth.py
+  - services/certificate_policy.py
+  - services/cbsd_auth.py
+  - services/tls_matrix.py
+  - tools/winnforum/openssl_compat.py
+  tests:
+  - tests/security/test_tls_matrix.py
+  - tests/unit/test_certificate_policy.py
+  - tests/unit/test_openssl_compat.py
+  evidence: compliance/evidence/winnforum_scs_sds_sss_harness.md
+  notes: Harness OK 2026-08-07 gate verify; test_WINNF_FT_S_SDS_11.
+- id: WINNF.FT.S.SDS.12
+  family: SDS
+  case_scope: case
+  status: passing
+  implementation:
+  - services/mtls_auth.py
+  - services/certificate_policy.py
+  - services/cbsd_auth.py
+  - services/tls_matrix.py
+  - tools/winnforum/openssl_compat.py
+  tests:
+  - tests/security/test_tls_matrix.py
+  - tests/unit/test_certificate_policy.py
+  - tests/unit/test_openssl_compat.py
+  evidence: compliance/evidence/winnforum_scs_sds_sss_harness.md
+  notes: Harness OK 2026-08-07 gate verify; test_WINNF_FT_S_SDS_12.
+- id: WINNF.FT.S.SDS.13
+  family: SDS
+  case_scope: case
+  status: passing
+  implementation:
+  - services/mtls_auth.py
+  - services/certificate_policy.py
+  - services/cbsd_auth.py
+  - services/tls_matrix.py
+  - tools/winnforum/openssl_compat.py
+  tests:
+  - tests/security/test_tls_matrix.py
+  - tests/unit/test_certificate_policy.py
+  - tests/unit/test_openssl_compat.py
+  evidence: compliance/evidence/winnforum_scs_sds_sss_harness.md
+  notes: Harness OK 2026-08-07 gate verify; test_WINNF_FT_S_SDS_13.
+- id: WINNF.FT.S.SDS.14
+  family: SDS
+  case_scope: case
+  status: passing
+  implementation:
+  - services/mtls_auth.py
+  - services/certificate_policy.py
+  - services/cbsd_auth.py
+  - services/tls_matrix.py
+  - tools/winnforum/openssl_compat.py
+  tests:
+  - tests/security/test_tls_matrix.py
+  - tests/unit/test_certificate_policy.py
+  - tests/unit/test_openssl_compat.py
+  evidence: compliance/evidence/winnforum_scs_sds_sss_harness.md
+  notes: Harness OK 2026-08-07 gate verify; test_WINNF_FT_S_SDS_14.
+- id: WINNF.FT.S.SDS.15
+  family: SDS
+  case_scope: case
+  status: passing
+  implementation:
+  - services/mtls_auth.py
+  - services/certificate_policy.py
+  - services/cbsd_auth.py
+  - services/tls_matrix.py
+  - tools/winnforum/openssl_compat.py
+  tests:
+  - tests/security/test_tls_matrix.py
+  - tests/unit/test_certificate_policy.py
+  - tests/unit/test_openssl_compat.py
+  evidence: compliance/evidence/winnforum_scs_sds_sss_harness.md
+  notes: Harness OK 2026-08-07 gate verify; test_WINNF_FT_S_SDS_15.
+- id: WINNF.FT.S.SDS.16
+  family: SDS
+  case_scope: case
+  status: passing
+  implementation:
+  - services/mtls_auth.py
+  - services/certificate_policy.py
+  - services/cbsd_auth.py
+  - services/tls_matrix.py
+  - tools/winnforum/openssl_compat.py
+  tests:
+  - tests/security/test_tls_matrix.py
+  - tests/unit/test_certificate_policy.py
+  - tests/unit/test_openssl_compat.py
+  evidence: compliance/evidence/winnforum_scs_sds_sss_harness.md
+  notes: Harness OK 2026-08-07 gate verify; test_WINNF_FT_S_SDS_16.
+- id: WINNF.FT.S.SDS.17
+  family: SDS
+  case_scope: case
+  status: passing
+  implementation:
+  - services/mtls_auth.py
+  - services/certificate_policy.py
+  - services/cbsd_auth.py
+  - services/tls_matrix.py
+  - tools/winnforum/openssl_compat.py
+  tests:
+  - tests/security/test_tls_matrix.py
+  - tests/unit/test_certificate_policy.py
+  - tests/unit/test_openssl_compat.py
+  evidence: compliance/evidence/winnforum_scs_sds_sss_harness.md
+  notes: Harness OK 2026-08-07 gate verify; test_WINNF_FT_S_SDS_17.
+- id: WINNF.FT.S.SDS.18
+  family: SDS
+  case_scope: case
+  status: passing
+  implementation:
+  - services/mtls_auth.py
+  - services/certificate_policy.py
+  - services/cbsd_auth.py
+  - services/tls_matrix.py
+  - tools/winnforum/openssl_compat.py
+  tests:
+  - tests/security/test_tls_matrix.py
+  - tests/unit/test_certificate_policy.py
+  - tests/unit/test_openssl_compat.py
+  evidence: compliance/evidence/winnforum_scs_sds_sss_harness.md
+  notes: Harness OK 2026-08-07 gate verify; test_WINNF_FT_S_SDS_18.
+- id: WINNF.FT.S.SDS.19
+  family: SDS
+  case_scope: case
+  status: passing
+  implementation:
+  - services/mtls_auth.py
+  - services/certificate_policy.py
+  - services/cbsd_auth.py
+  - services/tls_matrix.py
+  - tools/winnforum/openssl_compat.py
+  tests:
+  - tests/security/test_tls_matrix.py
+  - tests/unit/test_certificate_policy.py
+  - tests/unit/test_openssl_compat.py
+  evidence: compliance/evidence/winnforum_scs_sds_sss_harness.md
+  notes: Harness OK 2026-08-07 gate verify; test_WINNF_FT_S_SDS_19.
+- id: WINNF.FT.S.SSS.1
+  family: SSS
+  case_scope: case
+  status: passing
+  implementation:
+  - services/mtls_auth.py
+  - services/certificate_policy.py
+  - services/tls_matrix.py
+  - tools/winnforum/openssl_compat.py
+  - main.py
+  tests:
+  - tests/security/test_tls_matrix.py
+  - tests/unit/test_certificate_policy.py
+  - tests/unit/test_openssl_compat.py
+  evidence: compliance/evidence/winnforum_scs_sds_sss_harness.md
+  notes: Harness OK 2026-08-07 gate verify; test_WINNF_FT_S_SSS_1.
+- id: WINNF.FT.S.SSS.2
+  family: SSS
+  case_scope: case
+  status: passing
+  implementation:
+  - services/mtls_auth.py
+  - services/certificate_policy.py
+  - services/tls_matrix.py
+  - tools/winnforum/openssl_compat.py
+  - main.py
+  tests:
+  - tests/security/test_tls_matrix.py
+  - tests/unit/test_certificate_policy.py
+  - tests/unit/test_openssl_compat.py
+  evidence: compliance/evidence/winnforum_scs_sds_sss_harness.md
+  notes: Harness OK 2026-08-07 gate verify; test_WINNF_FT_S_SSS_2.
+- id: WINNF.FT.S.SSS.3
+  family: SSS
+  case_scope: case
+  status: passing
+  implementation:
+  - services/mtls_auth.py
+  - services/certificate_policy.py
+  - services/tls_matrix.py
+  - tools/winnforum/openssl_compat.py
+  - main.py
+  tests:
+  - tests/security/test_tls_matrix.py
+  - tests/unit/test_certificate_policy.py
+  - tests/unit/test_openssl_compat.py
+  evidence: compliance/evidence/winnforum_scs_sds_sss_harness.md
+  notes: Harness OK 2026-08-07 gate verify; test_WINNF_FT_S_SSS_3.
+- id: WINNF.FT.S.SSS.4
+  family: SSS
+  case_scope: case
+  status: passing
+  implementation:
+  - services/mtls_auth.py
+  - services/certificate_policy.py
+  - services/tls_matrix.py
+  - tools/winnforum/openssl_compat.py
+  - main.py
+  tests:
+  - tests/security/test_tls_matrix.py
+  - tests/unit/test_certificate_policy.py
+  - tests/unit/test_openssl_compat.py
+  evidence: compliance/evidence/winnforum_scs_sds_sss_harness.md
+  notes: Harness OK 2026-08-07 gate verify; test_WINNF_FT_S_SSS_4.
+- id: WINNF.FT.S.SSS.5
+  family: SSS
+  case_scope: case
+  status: passing
+  implementation:
+  - services/mtls_auth.py
+  - services/certificate_policy.py
+  - services/tls_matrix.py
+  - tools/winnforum/openssl_compat.py
+  - main.py
+  tests:
+  - tests/security/test_tls_matrix.py
+  - tests/unit/test_certificate_policy.py
+  - tests/unit/test_openssl_compat.py
+  evidence: compliance/evidence/winnforum_scs_sds_sss_harness.md
+  notes: Harness OK 2026-08-07 gate verify; test_WINNF_FT_S_SSS_5.
+- id: WINNF.FT.S.SSS.6
+  family: SSS
+  case_scope: case
+  status: passing
+  implementation:
+  - services/mtls_auth.py
+  - services/certificate_policy.py
+  - services/tls_matrix.py
+  - tools/winnforum/openssl_compat.py
+  - main.py
+  tests:
+  - tests/security/test_tls_matrix.py
+  - tests/unit/test_certificate_policy.py
+  - tests/unit/test_openssl_compat.py
+  evidence: compliance/evidence/winnforum_scs_sds_sss_harness.md
+  notes: Harness OK 2026-08-07 gate verify; test_WINNF_FT_S_SSS_6.
+- id: WINNF.FT.S.SSS.7
+  family: SSS
+  case_scope: case
+  status: passing
+  implementation:
+  - services/mtls_auth.py
+  - services/certificate_policy.py
+  - services/tls_matrix.py
+  - tools/winnforum/openssl_compat.py
+  - main.py
+  tests:
+  - tests/security/test_tls_matrix.py
+  - tests/unit/test_certificate_policy.py
+  - tests/unit/test_openssl_compat.py
+  evidence: compliance/evidence/winnforum_scs_sds_sss_harness.md
+  notes: Harness OK 2026-08-07 gate verify; test_WINNF_FT_S_SSS_7.
+- id: WINNF.FT.S.SSS.8
+  family: SSS
+  case_scope: case
+  status: passing
+  implementation:
+  - services/mtls_auth.py
+  - services/certificate_policy.py
+  - services/tls_matrix.py
+  - tools/winnforum/openssl_compat.py
+  - main.py
+  tests:
+  - tests/security/test_tls_matrix.py
+  - tests/unit/test_certificate_policy.py
+  - tests/unit/test_openssl_compat.py
+  evidence: compliance/evidence/winnforum_scs_sds_sss_harness.md
+  notes: Harness OK 2026-08-07 gate verify; test_WINNF_FT_S_SSS_8.
+- id: WINNF.FT.S.SSS.9
+  family: SSS
+  case_scope: case
+  status: passing
+  implementation:
+  - services/mtls_auth.py
+  - services/certificate_policy.py
+  - services/tls_matrix.py
+  - tools/winnforum/openssl_compat.py
+  - main.py
+  tests:
+  - tests/security/test_tls_matrix.py
+  - tests/unit/test_certificate_policy.py
+  - tests/unit/test_openssl_compat.py
+  evidence: compliance/evidence/winnforum_scs_sds_sss_harness.md
+  notes: Harness OK 2026-08-07 gate verify; test_WINNF_FT_S_SSS_9.
+- id: WINNF.FT.S.SSS.10
+  family: SSS
+  case_scope: case
+  status: passing
+  implementation:
+  - services/mtls_auth.py
+  - services/certificate_policy.py
+  - services/tls_matrix.py
+  - tools/winnforum/openssl_compat.py
+  - main.py
+  tests:
+  - tests/security/test_tls_matrix.py
+  - tests/unit/test_certificate_policy.py
+  - tests/unit/test_openssl_compat.py
+  evidence: compliance/evidence/winnforum_scs_sds_sss_harness.md
+  notes: Harness OK 2026-08-07 gate verify; test_WINNF_FT_S_SSS_10.
+- id: WINNF.FT.S.SSS.11
+  family: SSS
+  case_scope: case
+  status: passing
+  implementation:
+  - services/mtls_auth.py
+  - services/certificate_policy.py
+  - services/tls_matrix.py
+  - tools/winnforum/openssl_compat.py
+  - main.py
+  tests:
+  - tests/security/test_tls_matrix.py
+  - tests/unit/test_certificate_policy.py
+  - tests/unit/test_openssl_compat.py
+  evidence: compliance/evidence/winnforum_scs_sds_sss_harness.md
+  notes: Harness OK 2026-08-07 gate verify; test_WINNF_FT_S_SSS_11.
+- id: WINNF.FT.S.SSS.12
+  family: SSS
+  case_scope: case
+  status: passing
+  implementation:
+  - services/mtls_auth.py
+  - services/certificate_policy.py
+  - services/tls_matrix.py
+  - tools/winnforum/openssl_compat.py
+  - main.py
+  tests:
+  - tests/security/test_tls_matrix.py
+  - tests/unit/test_certificate_policy.py
+  - tests/unit/test_openssl_compat.py
+  evidence: compliance/evidence/winnforum_scs_sds_sss_harness.md
+  notes: Harness OK 2026-08-07 gate verify; test_WINNF_FT_S_SSS_12.
+- id: WINNF.FT.S.SSS.13
+  family: SSS
+  case_scope: case
+  status: passing
+  implementation:
+  - services/mtls_auth.py
+  - services/certificate_policy.py
+  - services/tls_matrix.py
+  - tools/winnforum/openssl_compat.py
+  - main.py
+  tests:
+  - tests/security/test_tls_matrix.py
+  - tests/unit/test_certificate_policy.py
+  - tests/unit/test_openssl_compat.py
+  evidence: compliance/evidence/winnforum_scs_sds_sss_harness.md
+  notes: Harness OK 2026-08-07 gate verify; test_WINNF_FT_S_SSS_13.
+- id: WINNF.FT.S.SSS.14
+  family: SSS
+  case_scope: case
+  status: passing
+  implementation:
+  - services/mtls_auth.py
+  - services/certificate_policy.py
+  - services/tls_matrix.py
+  - tools/winnforum/openssl_compat.py
+  - main.py
+  tests:
+  - tests/security/test_tls_matrix.py
+  - tests/unit/test_certificate_policy.py
+  - tests/unit/test_openssl_compat.py
+  evidence: compliance/evidence/winnforum_scs_sds_sss_harness.md
+  notes: Harness OK 2026-08-07 gate verify; test_WINNF_FT_S_SSS_14.
+- id: WINNF.FT.S.SSS.15
+  family: SSS
+  case_scope: case
+  status: passing
+  implementation:
+  - services/mtls_auth.py
+  - services/certificate_policy.py
+  - services/tls_matrix.py
+  - tools/winnforum/openssl_compat.py
+  - main.py
+  tests:
+  - tests/security/test_tls_matrix.py
+  - tests/unit/test_certificate_policy.py
+  - tests/unit/test_openssl_compat.py
+  evidence: compliance/evidence/winnforum_scs_sds_sss_harness.md
+  notes: Harness OK 2026-08-07 gate verify; test_WINNF_FT_S_SSS_15.
+- id: WINNF.FT.S.SSS.16
+  family: SSS
+  case_scope: case
+  status: passing
+  implementation:
+  - services/mtls_auth.py
+  - services/certificate_policy.py
+  - services/tls_matrix.py
+  - tools/winnforum/openssl_compat.py
+  - main.py
+  tests:
+  - tests/security/test_tls_matrix.py
+  - tests/unit/test_certificate_policy.py
+  - tests/unit/test_openssl_compat.py
+  evidence: compliance/evidence/winnforum_scs_sds_sss_harness.md
+  notes: Harness OK 2026-08-07 gate verify; test_WINNF_FT_S_SSS_16.
+- id: WINNF.FT.S.SSS.17
+  family: SSS
+  case_scope: case
+  status: passing
+  implementation:
+  - services/mtls_auth.py
+  - services/certificate_policy.py
+  - services/tls_matrix.py
+  - tools/winnforum/openssl_compat.py
+  - main.py
+  tests:
+  - tests/security/test_tls_matrix.py
+  - tests/unit/test_certificate_policy.py
+  - tests/unit/test_openssl_compat.py
+  evidence: compliance/evidence/winnforum_scs_sds_sss_harness.md
+  notes: Harness OK 2026-08-07 gate verify; test_WINNF_FT_S_SSS_17.
+- id: WINNF.FT.S.SSS.18
+  family: SSS
+  case_scope: case
+  status: passing
+  implementation:
+  - services/mtls_auth.py
+  - services/certificate_policy.py
+  - services/tls_matrix.py
+  - tools/winnforum/openssl_compat.py
+  - main.py
+  tests:
+  - tests/security/test_tls_matrix.py
+  - tests/unit/test_certificate_policy.py
+  - tests/unit/test_openssl_compat.py
+  evidence: compliance/evidence/winnforum_scs_sds_sss_harness.md
+  notes: Harness OK 2026-08-07 gate verify; test_WINNF_FT_S_SSS_18.

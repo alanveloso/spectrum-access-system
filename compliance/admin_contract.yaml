@@ -1,0 +1,544 @@
+version: 1
+# External WInnForum harness leaf (set SAS_HARNESS_DIR / WINNFORUM_HARNESS_DIR).
+harness_root: external
+methods:
+- method: BlacklistByFccId
+  endpoint: /admin/injectdata/blacklist_fcc_id
+  http_method: POST
+  in_interface: true
+  request_schema: A dictionary with a single key-value pair where the key is "fccId" and the value is
+    the FCC ID (string) to be blacklisted.
+  response_schema: empty_200
+  state_changed: persist injection (injectdata/blacklist_fcc_id)
+  uut_status: implemented
+  consumers:
+  - GRA
+  - HBT
+  - REG
+  - SIQ
+  notes: mutates domain tables/services
+- method: BlacklistByFccIdAndSerialNumber
+  endpoint: /admin/injectdata/blacklist_fcc_id_and_serial_number
+  http_method: POST
+  in_interface: true
+  request_schema: 'A dictionary with the following key-value pairs: "fccId": (string) blacklisted FCC
+    ID "serialNumber": (string) blacklisted serial number'
+  response_schema: empty_200
+  state_changed: persist injection (injectdata/blacklist_fcc_id_and_serial_number)
+  uut_status: implemented
+  consumers: []
+  notes: mutates domain tables/services; interface docstring uses serialNumber; sas-core schema expects
+    cbsdSerialNumber
+- method: GetDailyActivitiesStatus
+  endpoint: /admin/get_daily_activities_status
+  http_method: POST
+  in_interface: true
+  request_schema: (none)
+  response_schema: '{completed: bool}'
+  state_changed: read-only status/query
+  uut_status: implemented
+  consumers:
+  - EXZ
+  - FAD
+  - FDB
+  - FPR
+  - GPR
+  - GRA
+  - HBT
+  - HELPER
+  - IPR
+  - MCP
+  - PPR
+  - SIQ
+  - WDB
+  notes: mutates domain tables/services
+- method: GetPpaCreationStatus
+  endpoint: /admin/get_ppa_status
+  http_method: POST
+  in_interface: true
+  request_schema: (none)
+  response_schema: '{completed: bool, withError: bool}'
+  state_changed: read-only status/query
+  uut_status: implemented
+  consumers:
+  - HELPER
+  - PCR
+  - WDB
+  notes: mutates domain tables/services
+- method: InjectClusterList
+  endpoint: /admin/injectdata/cluster_list
+  http_method: POST
+  in_interface: false
+  request_schema: (unspecified)
+  response_schema: empty_200
+  state_changed: persist injection (injectdata/cluster_list)
+  uut_status: implemented
+  consumers: []
+  notes: mutates domain tables/services; Impl-only method (not on SasAdminInterface ABC)
+- method: InjectCpiUser
+  endpoint: /admin/injectdata/cpi_user
+  http_method: POST
+  in_interface: true
+  request_schema: 'A dictionary with the following key-value pairs: "cpiId": (string) valid cpiId to be
+    injected into SAS under test "cpiName": (string) valid name for cpi user to be injected into SAS under
+    test "cpiPublicKey": (string) public key value for cpi user to be injected into SAS under test'
+  response_schema: empty_200
+  state_changed: persist injection (injectdata/cpi_user)
+  uut_status: implemented
+  consumers:
+  - REG
+  notes: mutates domain tables/services
+- method: InjectDatabaseUrl
+  endpoint: /admin/injectdata/database_url
+  http_method: POST
+  in_interface: true
+  request_schema: Contains database url to be injected.
+  response_schema: empty_200
+  state_changed: persist injection (injectdata/database_url)
+  uut_status: implemented
+  consumers:
+  - FDB
+  - IPR
+  - WDB
+  notes: mutates domain tables/services
+- method: InjectEscSensorDataRecord
+  endpoint: /admin/injectdata/esc_sensor
+  http_method: POST
+  in_interface: true
+  request_schema: 'A dictionary with a single key-value pair where the key is "record" and the value is
+    a EscSensorData object (which is itself a dictionary specified in SAS-SAS TS WINNF-16-S-0096) Behavior:
+    SAS should act as if it is connected to an ESC sensor with the provided parameters.'
+  response_schema: empty_200
+  state_changed: persist injection (injectdata/esc_sensor)
+  uut_status: implemented
+  consumers:
+  - FAD
+  - MCP
+  notes: mutates domain tables/services
+- method: InjectEscZone
+  endpoint: /admin/injectdata/esc_zone
+  http_method: POST
+  in_interface: false
+  request_schema: (unspecified)
+  response_schema: JSON body
+  state_changed: persist injection (injectdata/esc_zone)
+  uut_status: implemented
+  consumers: []
+  notes: mutates domain tables/services; Impl-only method (not on SasAdminInterface ABC)
+- method: InjectExclusionZone
+  endpoint: /admin/injectdata/exclusion_zone
+  http_method: POST
+  in_interface: true
+  request_schema: 'A dictionary with the following key-value pairs: "zone": A GeoJSON object defining
+    the exclusion zone to be injected to SAS UUT. "frequencyRanges": A list of frequency ranges for the
+    exclusion zone.'
+  response_schema: JSON body
+  state_changed: persist injection (injectdata/exclusion_zone)
+  uut_status: implemented
+  consumers:
+  - EXZ
+  notes: mutates domain tables/services
+- method: InjectFccId
+  endpoint: /admin/injectdata/fcc_id
+  http_method: POST
+  in_interface: true
+  request_schema: 'A dictionary with the following key-value pairs: "fccId": (string) valid fccId to be
+    injected into SAS under test "fccMaxEirp": (double) optional; default value of 47 dBm/10 MHz'
+  response_schema: empty_200
+  state_changed: persist injection (injectdata/fcc_id)
+  uut_status: implemented
+  consumers:
+  - BPR
+  - DRG
+  - EXZ
+  - FAD
+  - GRA
+  - HBT
+  - HELPER
+  - HELPER.assertRegistered
+  - MES
+  - QPR
+  - REG
+  - RLQ
+  - SCS
+  - SDS
+  - SIQ
+  - WDB
+  notes: mutates domain tables/services
+- method: InjectFss
+  endpoint: /admin/injectdata/fss
+  http_method: POST
+  in_interface: true
+  request_schema: A dictionary with a single key-value pair where the key is "record" and the value is
+    a fixed satellite service object (which is itself a dictionary). The dictionary is an IncumbentProtectionData
+    object (specified in SAS-SAS TS).
+  response_schema: empty_200
+  state_changed: persist injection (injectdata/fss)
+  uut_status: implemented
+  consumers:
+  - FPR
+  - HBT
+  - MCP
+  - SIQ
+  notes: mutates domain tables/services
+- method: InjectPalDatabaseRecord
+  endpoint: /admin/injectdata/pal_database_record
+  http_method: POST
+  in_interface: true
+  request_schema: For the contents of this request, please refer to the PAL Database TS (WINNF-16-S-0245).
+  response_schema: empty_200
+  state_changed: persist injection (injectdata/pal_database_record)
+  uut_status: implemented
+  consumers:
+  - FAD
+  - GRA
+  - MCP
+  - PCR
+  - PPR
+  - SIQ
+  notes: mutates domain tables/services
+- method: InjectPeerSas
+  endpoint: /admin/injectdata/peer_sas
+  http_method: POST
+  in_interface: true
+  request_schema: 'A dictionary with the following key-value pairs: "certificateHash": the sha1 fingerprint
+    of the certificate "url": base URL of the peer SAS.'
+  response_schema: empty_200
+  state_changed: persist injection (injectdata/peer_sas)
+  uut_status: implemented
+  consumers:
+  - FAD
+  - GRA
+  - IPR
+  - MCP
+  - PCR
+  - PPR
+  - SSS
+  notes: mutates domain tables/services
+- method: InjectSasAdministratorRecord
+  endpoint: /admin/injectdata/sas_admin
+  http_method: POST
+  in_interface: true
+  request_schema: A dictionary with a single key-value pair where the key is "record" and the value is
+    a SAS Administrator information (which is itself a dictionary). The dictionary is an SASAdministrator
+    object (Specified in SAS-SAS TS WINNF-16-S-0096)
+  response_schema: empty_200
+  state_changed: persist injection (injectdata/sas_admin)
+  uut_status: implemented
+  consumers: []
+  notes: mutates domain tables/services
+- method: InjectUserId
+  endpoint: /admin/injectdata/user_id
+  http_method: POST
+  in_interface: true
+  request_schema: A dictionary with a single key-value pair where the key is "userId" and the value is
+    a string of valid userId to be whitelisted by the SAS under test.
+  response_schema: empty_200
+  state_changed: persist injection (injectdata/user_id)
+  uut_status: implemented
+  consumers:
+  - BPR
+  - DRG
+  - FAD
+  - GRA
+  - HBT
+  - HELPER
+  - HELPER.assertRegistered
+  - MES
+  - QPR
+  - REG
+  - RLQ
+  - SCS
+  - SDS
+  - SIQ
+  - WDB
+  notes: mutates domain tables/services
+- method: InjectWisp
+  endpoint: /admin/injectdata/wisp
+  http_method: POST
+  in_interface: true
+  request_schema: 'A dictionary with two key-value pairs where the keys are "record" and "zone" with the
+    values IncumbentProtectionData object (specified in SAS-SAS TS) and a GeoJSON Object respectively
+    Note: Required Field in IncumbentProtectionData are id, type, deploymentParam->operationParam->operationFrequencyRan'
+  response_schema: empty_200
+  state_changed: persist injection (injectdata/wisp)
+  uut_status: implemented
+  consumers:
+  - FPR
+  - GPR
+  - HBT
+  - MCP
+  - SIQ
+  notes: mutates domain tables/services
+- method: InjectZoneData
+  endpoint: /admin/injectdata/zone
+  http_method: POST
+  in_interface: true
+  request_schema: A dictionary with a single key-value pair where the key is "record" and the value is
+    ZoneData object to be injected into SAS under test. For more information about ZoneData please see
+    the SAS-SAS TS (WINNF-16-S-0096).
+  response_schema: zone id JSON
+  state_changed: persist injection (injectdata/zone)
+  uut_status: implemented
+  consumers:
+  - FAD
+  - GRA
+  - MCP
+  - PCR
+  - SIQ
+  notes: mutates domain tables/services
+- method: PreloadRegistrationData
+  endpoint: /admin/injectdata/conditional_registration
+  http_method: POST
+  in_interface: true
+  request_schema: A dictionary with a single key-value pair where the key is "registrationData" and the
+    value is a list of individual CBSD registration data which need to be preloaded into SAS (each of
+    which is itself a dictionary). The dictionary is a RegistrationRequest object, the fccId and cbsdSerialNumber
+    fields
+  response_schema: empty_200
+  state_changed: persist injection (injectdata/conditional_registration)
+  uut_status: implemented
+  consumers:
+  - BPR
+  - EXZ
+  - FAD
+  - GRA
+  - HELPER
+  - HELPER.assertRegistered
+  - QPR
+  - REG
+  notes: mutates domain tables/services
+- method: QueryPropagationAndAntennaModel
+  endpoint: /admin/query/propagation_and_antenna_model
+  http_method: POST
+  in_interface: true
+  request_schema: 'A dictionary with multiple key-value pairs where the keys are reliabilityLevel: (permitted
+    values: -1, 0.05, 0.95) cbsd: dictionary defining cbsd fss(optional): dictionary defining fss ppa(optional):
+    GeoJSON Object'
+  response_schema: '{pathlossDb, txAntennaGainDbi?, rxAntennaGainDbi?} or HTTP 400/503'
+  state_changed: read-only status/query
+  uut_status: implemented
+  consumers:
+  - PAT
+  notes: Propagation service; 400 invalid request; 503 if reference models/ITM unavailable
+- method: Reset
+  endpoint: /admin/reset
+  http_method: POST
+  in_interface: true
+  request_schema: (none)
+  response_schema: empty_200
+  state_changed: full UUT baseline reset
+  uut_status: implemented
+  consumers:
+  - BPR
+  - DRG
+  - EPR
+  - EXZ
+  - FAD
+  - FDB
+  - FPR
+  - GPR
+  - GRA
+  - HBT
+  - HELPER
+  - IPR
+  - MCP
+  - MES
+  - PAT
+  - PPR
+  - QPR
+  - REG
+  - RLQ
+  - SIQ
+  - WDB
+  notes: resets database
+- method: ResetEscZone
+  endpoint: /admin/trigger/esc_reset
+  http_method: POST
+  in_interface: false
+  request_schema: (unspecified)
+  response_schema: empty_200
+  state_changed: trigger/esc_reset
+  uut_status: implemented
+  consumers: []
+  notes: mutates domain tables/services; Impl-only method (not on SasAdminInterface ABC)
+- method: TriggerBulkDpaActivation
+  endpoint: /admin/trigger/bulk_dpa_activation
+  http_method: POST
+  in_interface: true
+  request_schema: 'A dictionary with the following key-value pairs: "activate": (boolean) if True, activate
+    all ESC-monitored DPAs on all channels else deactivate all ESC-monitored DPAs on all channels'
+  response_schema: empty_200
+  state_changed: trigger side-effect (trigger/bulk_dpa_activation)
+  uut_status: implemented
+  consumers:
+  - GRA
+  - HBT
+  - IPR
+  - MCP
+  - SIQ
+  notes: mutates domain tables/services
+- method: TriggerDailyActivitiesImmediately
+  endpoint: /admin/trigger/daily_activities_immediately
+  http_method: POST
+  in_interface: true
+  request_schema: (none)
+  response_schema: empty_200
+  state_changed: trigger side-effect (trigger/daily_activities_immediately)
+  uut_status: implemented
+  consumers:
+  - EXZ
+  - FAD
+  - FDB
+  - FPR
+  - GPR
+  - GRA
+  - HBT
+  - HELPER
+  - IPR
+  - MCP
+  - PPR
+  - SIQ
+  - WDB
+  notes: mutates domain tables/services
+- method: TriggerDpaActivation
+  endpoint: /admin/trigger/dpa_activation
+  http_method: POST
+  in_interface: true
+  request_schema: 'A dictionary with the following key-value pairs: "dpaId": (string) it represents the
+    field "name" in the kml file of DPAs "frequencyRange": frequencyRange of DPA Channel with lowFrequency,
+    highFrequency'
+  response_schema: empty_200
+  state_changed: trigger side-effect (trigger/dpa_activation)
+  uut_status: implemented
+  consumers:
+  - GRA
+  - HBT
+  - IPR
+  - MCP
+  - SIQ
+  notes: mutates domain tables/services
+- method: TriggerDpaDeactivation
+  endpoint: /admin/trigger/dpa_deactivation
+  http_method: POST
+  in_interface: true
+  request_schema: 'A dictionary with the following key-value pairs: "dpaId": (string) it represents the
+    field "name" in the kml file of DPAs "frequencyRange": frequencyRange of DPA Channel with lowFrequency,
+    highFrequency'
+  response_schema: empty_200
+  state_changed: trigger side-effect (trigger/dpa_deactivation)
+  uut_status: implemented
+  consumers:
+  - MCP
+  notes: mutates domain tables/services
+- method: TriggerEnableNtiaExclusionZones
+  endpoint: /admin/trigger/enable_ntia_15_517
+  http_method: POST
+  in_interface: true
+  request_schema: (none)
+  response_schema: empty_200
+  state_changed: trigger side-effect (trigger/enable_ntia_15_517)
+  uut_status: implemented
+  consumers:
+  - EXZ
+  notes: mutates domain tables/services
+- method: TriggerEnableScheduledDailyActivities
+  endpoint: /admin/trigger/enable_scheduled_daily_activities
+  http_method: POST
+  in_interface: true
+  request_schema: (none)
+  response_schema: empty_200
+  state_changed: trigger side-effect (trigger/enable_scheduled_daily_activities)
+  uut_status: implemented
+  consumers:
+  - FDB
+  notes: mutates domain tables/services
+- method: TriggerEscDisconnect
+  endpoint: /admin/trigger/disconnect_esc
+  http_method: POST
+  in_interface: true
+  request_schema: (none)
+  response_schema: empty_200
+  state_changed: trigger side-effect (trigger/disconnect_esc)
+  uut_status: implemented
+  consumers:
+  - IPR
+  notes: mutates domain tables/services
+- method: TriggerEscZone
+  endpoint: /admin/trigger/esc_detection
+  http_method: POST
+  in_interface: false
+  request_schema: (unspecified)
+  response_schema: empty_200
+  state_changed: trigger side-effect (trigger/esc_detection)
+  uut_status: implemented
+  consumers: []
+  notes: mutates domain tables/services; Impl-only method (not on SasAdminInterface ABC)
+- method: TriggerFullActivityDump
+  endpoint: /admin/trigger/create_full_activity_dump
+  http_method: POST
+  in_interface: true
+  request_schema: (none)
+  response_schema: empty_200
+  state_changed: trigger side-effect (trigger/create_full_activity_dump)
+  uut_status: implemented
+  consumers:
+  - FAD
+  - HELPER
+  - SSS
+  notes: mutates domain tables/services
+- method: TriggerLoadDpas
+  endpoint: /admin/trigger/load_dpas
+  http_method: POST
+  in_interface: true
+  request_schema: (none)
+  response_schema: empty_200
+  state_changed: trigger side-effect (trigger/load_dpas)
+  uut_status: implemented
+  consumers:
+  - GRA
+  - HBT
+  - IPR
+  - MCP
+  - SIQ
+  notes: mutates domain tables/services
+- method: TriggerMeasurementReportHeartbeat
+  endpoint: /admin/trigger/meas_report_in_heartbeat_response
+  http_method: POST
+  in_interface: true
+  request_schema: (none)
+  response_schema: empty_200
+  state_changed: trigger side-effect (trigger/meas_report_in_heartbeat_response)
+  uut_status: implemented
+  consumers:
+  - MES
+  notes: mutates domain tables/services
+- method: TriggerMeasurementReportRegistration
+  endpoint: /admin/trigger/meas_report_in_registration_response
+  http_method: POST
+  in_interface: true
+  request_schema: (none)
+  response_schema: empty_200
+  state_changed: trigger side-effect (trigger/meas_report_in_registration_response)
+  uut_status: implemented
+  consumers:
+  - MES
+  notes: mutates domain tables/services
+- method: TriggerPpaCreation
+  endpoint: /admin/trigger/create_ppa
+  http_method: POST
+  in_interface: true
+  request_schema: 'A dictionary with multiple key-value pairs where the keys are cbsdIds: array of string
+    containing CBSD Id palIds: array of string containing PAL Id providedContour(optional): GeoJSON Object'
+  response_schema: ppa_id string | empty
+  state_changed: trigger side-effect (trigger/create_ppa)
+  uut_status: implemented
+  consumers:
+  - HELPER
+  - PCR
+  - WDB
+  notes: mutates domain tables/services
+gaps:
+  official_paths_missing_from_impl_parse: []
+  impl_paths_not_in_official_inventory: []
+  stub_or_unimplemented: []

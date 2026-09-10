@@ -1,0 +1,104 @@
+# Holdout representation — TVWS 47 CFR §15.711 .
+# Representable subset ONLY against frozen Spectrum Profile + registered mechanisms.
+# CONDITIONAL: full §15.711 database query path requires query_assignment
+# (deferred design) — NOT registered; NOT used as authorization.mechanism here.
+# Zero profile-specific Python. Not an FCC conformity claim.
+# Illustrative UHF TV-channel range only (not a complete national TVWS band plan).
+
+api_version: spectrum-access/v2
+kind: SpectrumProfile
+
+metadata:
+  id: us_tvws_15_711
+  version: "1.0.0"
+  status: custom
+  based_on: null
+  references:
+    - CFR_47_15_711
+    - CFR_47_15_713
+    - TVWS-002
+    - TVWS-003
+    - TVWS-011
+    - TVWS-013
+
+spectrum:
+ # Illustrative UHF white-space style range (approx. TV channels 14–36).
+  ranges:
+    - id: uhf_tvws_illustrative
+      low_hz: 470000000
+      high_hz: 608000000
+  channelization:
+    mechanism: fixed_width_channelization
+    width_hz: 6000000
+    origin_hz: 470000000
+    role: assignment
+
+# D10: omit access — Part 15 database access is not CBRS ordered_classes.
+
+# Authorization omitted on purpose (CONDITIONAL):
+# query_assignment is the correct mechanism ( TVWS-002) but remains unregistered.
+# Do not fake static_authorization / dynamic_lease for TVWS database queries.
+
+power:
+ # Illustrative closed selectors (device_class strings are profile data, not core nouns).
+ # Full per-channel powers come from the database query when query_assignment exists.
+  mechanism: rule_table
+  rules:
+    - max_eirp_dbm: 36.0
+      device_class: fixed
+      indoor_outdoor: outdoor
+    - max_eirp_dbm: 20.0
+      device_class: mode_ii
+    - max_eirp_dbm: 16.0
+      device_class: mode_i
+
+geography:
+ # Geo-location uncertainty ball placeholder (Mode II / Fixed with geo).
+  mechanism: point_radius
+  center:
+    latitude_deg: 38.8977
+    longitude_deg: -77.0365
+  radius_m: 50.0
+
+temporal:
+ # Mode II location recheck cadence (device may be stricter); not CBRS heartbeat-in-lease.
+  reevaluation:
+    mechanism: periodic
+    interval_s: 60
+ # 48-hour scheduled availability horizon (§15.713) as availability_constraint mode.
+  availability:
+    mechanism: availability_constraint
+    mode: scheduled
+
+protection:
+  mechanisms:
+    - protection_entitlement
+    - channel_exclusion
+    - distance_exclusion
+    - exclusion_zone
+
+coordination:
+  mechanism: snapshot_evaluate_apply
+
+rf:
+  required: false
+  policy: path_loss_plus_aggregate
+
+data:
+  required_capabilities:
+    - protected_entities
+    - boundaries
+    - reference_data
+
+requirements:
+  device_capabilities:
+    - geolocation
+    - frequency_range
+    - max_eirp
+
+constraints:
+ # Fixed-device HAAT-related ceiling used in Mode I proxy rules (§15.711) — illustrative.
+  - mechanism: antenna_height_limit
+    max_height_m: 106.0
+    indoor_outdoor: outdoor
+    device_class: fixed

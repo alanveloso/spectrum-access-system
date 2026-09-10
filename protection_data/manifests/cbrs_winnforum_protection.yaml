@@ -1,0 +1,126 @@
+id: cbrs_winnforum_protection
+version: "1.0.0"
+description: >
+  Versioned CBRS / WInnForum protection-data layout for terrain, clutter,
+  antennas, DPA, FSS/GWBL, zones and census/tract inputs. Binary payloads are
+  provisioned under data/; VERSION markers pin the package revision.
+  ITM *software* provenance lives in spectrum-propagation / RF plugin metadata,
+  not as protection-data payloads.
+rule_applied: winnforum_protection_data_v1
+slots:
+  # Legacy software-provenance marker (optional). ITM execution is delegated to
+  # spectrum-propagation; do not treat this slot as a propagation engine.
+  - id: itm_wf
+    kind: itm
+    version: "1.0.0"
+    relative_path: models/itm
+    required: false
+    presence: version_marker
+    description: >
+      DEPRECATED software-provenance marker for historical WF-ITM packaging.
+      Prefer RuntimeComposition / RF plugin provenance (spectrum-propagation).
+      Not a normative terrain/clutter dataset.
+
+  - id: terrain_ned
+    kind: terrain_ned
+    version: "usgs_ned_1_gridfloat_v1"
+    relative_path: geo/ned
+    required: true
+    presence: version_marker
+    description: USGS NED 1″ GridFloat tile set marker.
+
+  - id: terrain_ned_payload
+    kind: terrain_ned
+    version: "usgs_ned_1_gridfloat_v1"
+    relative_path: geo/ned
+    required: true
+    presence: files_glob
+    file_glob: "*.flt"
+    min_files: 1
+    payload_optional_unless_strict: true
+    description: NED .flt tiles (gitignored; required under SAS_PROTECTION_DATA_STRICT).
+
+  - id: nlcd_clutter
+    kind: nlcd
+    version: "1.0.0"
+    relative_path: geo/nlcd
+    required: true
+    presence: version_marker
+    description: NLCD / clutter land-cover package marker.
+
+  - id: antenna_patterns
+    kind: antenna
+    version: "1.0.0"
+    relative_path: models/antenna
+    required: true
+    presence: version_marker
+    description: Antenna pattern tables marker.
+
+  - id: dpa_definitions
+    kind: dpa
+    version: "1.0.0"
+    relative_path: ntia
+    required: true
+    presence: version_marker
+    description: NTIA DPA KML catalogue marker.
+
+  - id: dpa_payload
+    kind: dpa
+    version: "1.0.0"
+    relative_path: ntia
+    required: true
+    presence: files_glob
+    file_glob: "*.kml"
+    min_files: 1
+    payload_optional_unless_strict: true
+    description: DPA KML files (gitignored unless vendored; strict mode requires them).
+
+  - id: fss_sites
+    kind: fss
+    version: "1.0.0"
+    relative_path: federal/fss
+    required: true
+    presence: version_marker
+    description: FSS site database package marker.
+
+  - id: gwbl
+    kind: gwbl
+    version: "1.0.0"
+    relative_path: federal/gwbl
+    required: true
+    presence: version_marker
+    description: GWBL database package marker.
+
+  - id: zones_reference
+    kind: zones
+    version: "1.0.0"
+    relative_path: geo/zones
+    required: true
+    presence: version_marker
+    description: Border / quiet / exclusion reference geometry marker.
+
+  # Arrangement R US/Canada border KMZ (presence only; SHA-256 documented in
+  # data/fcc/README.md — DatasetSlot has no checksum field). Version id pins
+  # WInnForum SAS harness provenance; do not treat data/fcc/VERSION as this
+  # payload's identity (that marker is for the broader FCC quiet-zone package).
+  - id: us_canada_border
+    kind: zones
+    version: "winnforum_uscabdry_sampled_928c3150adf7b31e"
+    relative_path: fcc
+    required: true
+    presence: files_glob
+    file_glob: uscabdry_sampled.kmz
+    min_files: 1
+    payload_optional_unless_strict: false
+    description: >
+      WInnForum uscabdry_sampled.kmz for Arrangement R sharing-zone membership
+      (byte-copy of SAS harness data/fcc at 928c3150adf7b31e53a96b695bf1fbdd3284ecb2;
+      SHA-256 3e3c28dbcecde2b06886507bec8691e23a6a12e2a498b6ac575fe8c1f16b4ec1).
+
+  - id: census_tracts
+    kind: census
+    version: "1.0.0"
+    relative_path: geo/census
+    required: true
+    presence: version_marker
+    description: Census / tract inputs for PPA service-area marker.

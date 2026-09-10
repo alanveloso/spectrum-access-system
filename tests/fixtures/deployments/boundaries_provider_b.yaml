@@ -1,0 +1,19 @@
+# Test-only deployment: boundaries capability via alternate mapping provider.
+# Same profile/runtime requirements as boundaries_provider_a; differs only in provider selection.
+
+id: boundaries_provider_b
+version: "1.0.0"
+description: Lego proof deployment B — mapping_boundaries for boundaries capability.
+profile_hint: cbrs_winnforum
+
+protocol:
+  plugin: winnforum_rest
+
+device:
+  plugin: cbsd
+
+rf:
+  plugin: free_space
+
+providers:
+  - plugin: mapping_boundaries

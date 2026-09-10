@@ -1,0 +1,57 @@
+.venv/
+venv/
+__pycache__/
+**/__pycache__/
+*.py[cod]
+*.pyo
+*.egg-info/
+build/
+dist/
+sas_mvp.db
+*.db-journal
+.env
+.env.local
+certs/
+.coverage
+htmlcov/
+.pytest_cache/
+.ruff_cache/
+.mypy_cache/
+artifacts/
+.cache/
+.cursor/
+*.swp
+.DS_Store
+Thumbs.db
+
+# Generated certification bundle (rebuild from tools.winnforum.certification_package).
+certification-package/
+
+# Local harness symlink must never be committed; use SAS_HARNESS_DIR / WINNFORUM_HARNESS_DIR.
+src/harness
+
+# USGS NED GridFloat tiles (WInnForum Common-Data); keep README + VERSION.
+data/geo/ned/**
+!data/geo/ned/README.md
+!data/geo/ned/VERSION
+# NLCD / clutter land-cover tiles (externally acquired); keep README + VERSION.
+data/geo/nlcd/**
+!data/geo/nlcd/README.md
+!data/geo/nlcd/VERSION
+# County GeoJSON by FIPS (PAL licenseAreaIdentifier / PCR·WDB PPA); keep README + VERSION.
+data/geo/county/**
+!data/geo/county/README.md
+!data/geo/county/VERSION
+# ANATEL SLP operator feature bundles; keep README + template only.
+data/geo/anatel/**/*_bundle.yaml
+!data/geo/anatel/README.md
+!data/geo/anatel/*.template.yaml
+# NTIA DPA / protection-zone datasets (regulatory data; provision locally).
+data/ntia/**
+!data/ntia/README.md
+!data/ntia/VERSION
+
+# Runtime databases
+*.db
+*.sqlite
+*.sqlite3

@@ -1,0 +1,32 @@
+# Operator feature bundle template for ANATEL SLP 3700–3800 coexistence inputs  .
+#
+# Copy to: data/geo/anatel/slp_3700_operator_bundle.yaml  (gitignored)
+# Or set:  SPECTRUM_ACCESS_FEATURE_BUNDLE=/absolute/path/to/bundle.yaml
+#
+# Fill geometries ONLY from official ANATEL BDTA / licensed cadastral exports /
+# Ato 915 coordination inputs. Do NOT invent EMSAT, earth-station, or terrestrial
+# station coordinates in this repository.
+#
+# Empty feature lists keep discovery available but fetch() fails closed until filled.
+
+api_version: spectrum-access-data/v1
+
+provenance:
+  dataset_id: anatel_slp_3700_operator_pack
+  dataset_version: "unset"
+  provider_id: operator_feature_bundle
+
+# BR-SLP-3700-012 / 013 / 014 — protected entities (EMSAT, earth stations, …)
+protected_entities:
+  features: []
+  # Example shape (DO NOT commit real or invented regulatory coords as "official"):
+  # - id: emsat_ilha_governador
+  #   ring:
+  #     - [lon, lat]
+  #     - [lon, lat]
+  #     - [lon, lat]
+  #     - [lon, lat]
+
+# BR-SLP-3700-012 / 016 — property / administrative boundaries used for coordination
+boundaries:
+  features: []

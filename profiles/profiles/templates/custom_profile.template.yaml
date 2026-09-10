@@ -1,0 +1,91 @@
+# Custom Spectrum Spectrum Profile — copy/adapt template ().
+# Validate without writing Python:
+# python -m tools.profile_doctor path/to/your_copy.yaml
+# New device/protocol/RF/data behavior needs a Python plugin — see:
+# docs/plugins/creating_plugins.md ()
+#
+# Same schema as reference profiles (status differs: custom vs reference).
+# Do NOT put arbitrary if/else or expressions here — only registered mechanisms.
+# Band lives in this file; there is no separate BandProfile selector.
+# based_on is provenance only (no YAML inheritance/merge).
+
+api_version: spectrum-access/v2
+kind: SpectrumProfile
+
+metadata:
+  id: custom_profile_template
+  version: "1.0.0"
+  status: custom
+  based_on: null
+  references: []
+
+spectrum:
+ # Change low_hz / high_hz (and channelization origin/width) for your band.
+  ranges:
+    - id: primary
+      low_hz: 6425000000
+      high_hz: 7125000000
+  channelization:
+    mechanism: fixed_width_channelization
+    width_hz: 20000000
+    origin_hz: 6425000000
+    role: assignment
+
+access:
+ # Add/remove/reorder classes freely; ids are opaque tokens (not core enums).
+  mechanism: ordered_classes
+  classes:
+    - id: critical
+      priority: 300
+      preemptible: false
+    - id: local
+      priority: 200
+      preemptible: true
+    - id: opportunistic
+      priority: 100
+      preemptible: true
+
+authorization:
+  mechanism: dynamic_lease
+  duration_s: 300
+
+power:
+  mechanism: rule_table
+  rules:
+    - max_eirp_dbm: 36.0
+      max_psd_dbm_mhz: 23.0
+
+temporal:
+  reevaluation:
+    mechanism: periodic
+    interval_s: 60
+
+# Omit geography when unused. For authorized_area / exclusion_zone / point_radius,
+# fill the matching payload required by the schema (areas, zones, or center+radius).
+
+protection:
+ # Only mechanisms already registered in the catalog.
+  mechanisms:
+    - protection_entitlement
+    - channel_exclusion
+
+coordination:
+  mechanism: snapshot_evaluate_apply
+
+rf:
+ # Use registered policy/model ids only (e.g. path_loss, not unregistered names).
+  required: true
+  policy: path_loss_plus_aggregate
+  propagation_model: path_loss
+
+data:
+ # Capability tokens — not vendor/plugin names.
+  required_capabilities:
+    - terrain
+    - protected_entities
+
+requirements:
+  device_capabilities:
+    - geolocation
+    - frequency_range
+    - max_eirp

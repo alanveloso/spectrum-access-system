@@ -1,0 +1,92 @@
+# Reference Spectrum Profile — EU eLSA / LSA design regime .
+# Traceability: compliance/etsi/elsa_requirements_matrix.yaml
+# Illustrative band only (eLSA is band-agnostic in ETSI TS 103 652); not a national
+# Sharing Framework claim. Zero profile-specific Python.
+
+api_version: spectrum-access/v2
+kind: SpectrumProfile
+
+metadata:
+  id: eu_elsa
+  version: "1.0.0"
+  status: reference
+  based_on: null
+  references:
+    - ETSI_TS_103_652_1
+    - ETSI_TS_103_652_2
+    - ETSI_TS_103_652_3
+    - ELSA-001
+    - ELSA-002
+    - ELSA-005
+    - ELSA-006
+    - ELSA-007
+    - ELSA-015
+    - ELSA-018
+    - ELSA-022
+    - ELSA-025
+
+spectrum:
+ # Illustrative 2300–2400 MHz shared-access style range (not a frozen national band).
+  ranges:
+    - id: illustrative_shared
+      low_hz: 2300000000
+      high_hz: 2400000000
+ # Channelization optional for availability-centric regimes .
+
+# D10 / ELSA-005: incumbents are availability/protection sources — omit access.
+
+authorization:
+ # Network holder + validity window; keep-alive is not required (ELSA-022).
+  mechanism: fixed_window
+
+power:
+  mechanism: rule_table
+  rules:
+    - max_eirp_dbm: 30.0
+      device_class: mfcn
+
+geography:
+  mechanism: authorized_area
+  authorized_areas:
+    - id: allowance_placeholder
+      ring:
+        - [2.3000, 48.8500]
+        - [2.3100, 48.8500]
+        - [2.3100, 48.8600]
+        - [2.3000, 48.8600]
+        - [2.3000, 48.8500]
+
+temporal:
+ # first-class availability (scheduled mode example).
+  availability:
+    mechanism: availability_constraint
+    mode: scheduled
+
+protection:
+ # No aggregate IAP/fairshare (ELSA-024); entity packs via data capabilities.
+  mechanisms:
+    - protection_entitlement
+    - channel_exclusion
+    - distance_exclusion
+    - exclusion_zone
+
+coordination:
+  mechanism: snapshot_evaluate_apply
+
+rf:
+ # RF gated; fail-closed only when required (ELSA-025).
+  required: false
+  policy: path_loss_plus_aggregate
+
+data:
+  required_capabilities:
+    - protected_entities
+    - boundaries
+
+requirements:
+ # Network/managed-consumer ; not CBSD geolocation.
+  network_capabilities:
+    - managed_area
+    - network_identity
+    - frequency_range
+    - max_eirp

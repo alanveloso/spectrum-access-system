@@ -1,0 +1,46 @@
+# Docker Compose overlay for official WInnForum harness LIVE validation.
+#
+# SAS UUT is expected on the host listening on 9000/9001. Default
+# ``network_mode: host`` keeps official test.cfg ``hostname: localhost``
+# consistent for UUT callbacks AND harness DatabaseServer inject URLs
+# (CPI/PAL/… on ports 9010–9020). Bridge + localhost:host-gateway only
+# reaches the UUT from the harness and breaks host-UUT → injected localhost.
+#
+# Override: WINNFORUM_HARNESS_NETWORK_MODE=bridge (then restore extra_hosts).
+#
+# Usage (from repo root):
+#   docker compose -f tools/winnforum/docker-compose.harness.yml build
+#   docker compose -f tools/winnforum/docker-compose.harness.yml run --rm harness self-check
+#
+# Full campaign is normally driven by:
+#   python -m tools.run_winnforum --docker-harness --start-uut ...
+
+services:
+  harness:
+    build:
+      context: ../..
+      dockerfile: tools/winnforum/Dockerfile.harness
+      args:
+        HARNESS_COMMIT: "928c3150adf7b31e53a96b695bf1fbdd3284ecb2"
+    image: winnforum-sas-harness:928c3150
+    network_mode: host
+    environment:
+      TZ: America/Los_Angeles
+      HARNESS_COMMIT: "928c3150adf7b31e53a96b695bf1fbdd3284ecb2"
+      SAS_REPO_MOUNT: /opt/sas
+      ARTIFACTS_DIR: /artifacts
+      COMMON_DATA_DIR: /common-data
+      COMMON_DATA_COUNTY_DIR: /common-data-county
+      SAS_HOST: localhost
+      SAS_RSA_PORT: "9000"
+      SAS_ECC_PORT: "9001"
+    volumes:
+      - ../..:/opt/sas:ro
+      - ../../artifacts/winnforum/docker-harness:/artifacts
+      # Official Common-Data checkout (NED/NLCD). Entrypoint symlinks into data/geo.
+      - ../../../Common-Data/data:/common-data:ro
+      - ../../.cache/winnforum-harness-county:/common-data-county:ro
+      - ../../.cache/winnforum-harness-pki:/opt/winnforum-harness/src/harness/certs:ro
+    working_dir: /opt/winnforum-harness/src/harness
+    stdin_open: false
+    tty: false

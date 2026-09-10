@@ -1,0 +1,18 @@
+# Test-only deployment: device capability via mapping device adapter.
+
+id: device_provider_b
+version: "1.0.0"
+description: Lego proof deployment B — mapping device adapter.
+profile_hint: cbrs_winnforum
+
+protocol:
+  plugin: winnforum_rest
+
+device:
+  plugin: mapping
+
+rf:
+  plugin: free_space
+
+providers:
+  - plugin: protection_boundaries

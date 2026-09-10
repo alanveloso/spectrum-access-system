@@ -1,0 +1,20 @@
+[build-system]
+requires = ["setuptools==75.8.2", "wheel==0.45.1"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "sas-rf-independent-fspl"
+version = "0.1.0"
+description = "Independent Free-Space path-loss RfPort plugin for Spectrum Access System substitutability proofs"
+readme = "README.md"
+requires-python = ">=3.11"
+license = { text = "Apache-2.0" }
+# Depends only on the SAS RfPort contract at runtime (installed with the SAS).
+dependencies = []
+
+[project.entry-points."spectrum_access.rf_models"]
+independent_fspl = "sas_rf_independent_fspl.adapter:independent_fspl_rf_adapter"
+
+[tool.setuptools.packages.find]
+where = ["."]
+include = ["sas_rf_independent_fspl*"]

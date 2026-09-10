@@ -1,0 +1,84 @@
+{
+  "tolerance_db": 0.0,
+  "policy": "exact equality",
+  "cases": [
+    {
+      "id": "near_low",
+      "tx_lat": 39.0,
+      "tx_lon": -77.0,
+      "rx_lat": 39.01,
+      "rx_lon": -77.01,
+      "tx_height_m": 10.0,
+      "rx_height_m": 1.5,
+      "frequency_hz": 3625000000,
+      "path_loss_db": 106.59971083501696
+    },
+    {
+      "id": "near_tall",
+      "tx_lat": 39.0,
+      "tx_lon": -77.0,
+      "rx_lat": 39.01,
+      "rx_lon": -77.01,
+      "tx_height_m": 200.0,
+      "rx_height_m": 1.5,
+      "frequency_hz": 3625000000,
+      "path_loss_db": 106.6849976462301
+    },
+    {
+      "id": "short_tall",
+      "tx_lat": 39.0,
+      "tx_lon": -77.0,
+      "rx_lat": 39.001,
+      "rx_lon": -77.001,
+      "tx_height_m": 200.0,
+      "rx_height_m": 1.5,
+      "frequency_hz": 3550000000,
+      "path_loss_db": 91.17027433536481
+    },
+    {
+      "id": "mid_range",
+      "tx_lat": 39.0,
+      "tx_lon": -77.0,
+      "rx_lat": 39.1,
+      "rx_lon": -77.1,
+      "tx_height_m": 30.0,
+      "rx_height_m": 1.5,
+      "frequency_hz": 3625000000,
+      "path_loss_db": 126.59748788067014
+    },
+    {
+      "id": "far",
+      "tx_lat": 39.0,
+      "tx_lon": -77.0,
+      "rx_lat": 40.0,
+      "rx_lon": -78.0,
+      "tx_height_m": 30.0,
+      "rx_height_m": 1.5,
+      "frequency_hz": 3625000000,
+      "path_loss_db": 146.57642630196716
+    },
+    {
+      "id": "indoor_flag",
+      "tx_lat": 38.9,
+      "tx_lon": -77.05,
+      "rx_lat": 38.91,
+      "rx_lon": -77.04,
+      "tx_height_m": 6.0,
+      "rx_height_m": 1.5,
+      "frequency_hz": 3650000000,
+      "indoor": true,
+      "path_loss_db": 106.6639126843249
+    },
+    {
+      "id": "low_freq",
+      "tx_lat": 39.0,
+      "tx_lon": -77.0,
+      "rx_lat": 39.05,
+      "rx_lon": -77.05,
+      "tx_height_m": 10.0,
+      "rx_height_m": 10.0,
+      "frequency_hz": 3550000000,
+      "path_loss_db": 120.39643446093018
+    }
+  ]
+}

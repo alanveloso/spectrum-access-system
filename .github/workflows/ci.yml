@@ -1,0 +1,283 @@
+# Continuous integration for product regression. Does not invent WInnForum PASS.
+name: ci
+
+on:
+  push:
+    branches: [main, master, "fix/**", "test/**", "maintenance/**"]
+  pull_request:
+
+concurrency:
+  group: ci-${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+permissions:
+  contents: read
+
+jobs:
+  lint:
+    name: lint/format
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          submodules: recursive
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - name: Install system deps (Shapely/GEOS)
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y --no-install-recommends libgeos-dev
+      - name: Install tooling
+        run: |
+          python -m pip install --upgrade 'pip==25.2'
+          pip install -r requirements.lock.txt -r requirements-dev.txt
+      - name: Ruff check
+        run: ruff check .
+      - name: Ruff format check (CI-owned paths)
+        run: >
+          ruff format --check
+          compliance
+          tools/generate_dev_certs.py
+          tools/smoke_mtls.py
+          tests/contract/test_ci_workflow.py
+          tests/unit/test_generate_dev_certs.py
+          tests/unit/test_compliance_matrix.py
+
+  typecheck:
+    name: typecheck
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          submodules: recursive
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - name: Install system deps (Shapely/GEOS)
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y --no-install-recommends libgeos-dev
+      - name: Install tooling
+        run: |
+          python -m pip install --upgrade 'pip==25.2'
+          pip install -r requirements.lock.txt -r requirements-dev.txt
+      - name: Mypy (compliance + tools)
+        run: mypy compliance tools
+
+  unit:
+    name: unit-tests
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          submodules: recursive
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - name: Install system deps (Shapely/GEOS)
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y --no-install-recommends libgeos-dev
+      - name: Install
+        run: |
+          python -m pip install --upgrade 'pip==25.2'
+          pip install -r requirements.lock.txt -r requirements-dev.txt
+          pip install ./plugins/spectrum-propagation --no-deps
+          pip install -e . --no-deps
+          pip install -e tests/plugin_packages/independent_fspl
+          pip install -e tests/plugin_packages/alternate_boundaries
+          pip install -e tests/plugin_packages/synthetic_mechanism
+      - name: Fetch official NTIA KML catalogue (gitignored)
+        run: |
+          chmod +x tools/winnforum/fetch_ntia_catalogue.sh
+          # Unit EXZ path only needs protection_zones.kml; full set is small (~4.5MB).
+          tools/winnforum/fetch_ntia_catalogue.sh
+      - name: Pytest unit/contract/security/regression/architecture
+        run: >
+          pytest -q
+          tests/unit
+          tests/contract
+          tests/security
+          tests/regression
+          tests/architecture
+
+  integration-sqlite:
+    name: integration-sqlite
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          submodules: recursive
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - name: Install system deps (Shapely/GEOS)
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y --no-install-recommends libgeos-dev
+      - name: Install
+        run: |
+          python -m pip install --upgrade 'pip==25.2'
+          pip install -r requirements.lock.txt -r requirements-dev.txt
+          pip install ./plugins/spectrum-propagation --no-deps
+          pip install -e . --no-deps
+      - name: Pytest integration (SQLite paths)
+        run: pytest -q tests/integration -k "not postgres"
+
+  integration-postgres:
+    name: integration-postgres
+    runs-on: ubuntu-latest
+    services:
+      postgres:
+        image: postgres:15-alpine
+        env:
+          POSTGRES_USER: sas
+          POSTGRES_PASSWORD: sas_test
+          POSTGRES_DB: sas
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd "pg_isready -U sas -d sas"
+          --health-interval 5s
+          --health-timeout 5s
+          --health-retries 10
+    env:
+      SAS_TEST_DATABASE_URL: postgresql+psycopg2://sas:sas_test@127.0.0.1:5432/sas
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          submodules: recursive
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - name: Install system deps (Shapely/GEOS)
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y --no-install-recommends libgeos-dev
+      - name: Install
+        run: |
+          python -m pip install --upgrade 'pip==25.2'
+          pip install -r requirements.lock.txt -r requirements-dev.txt
+          pip install ./plugins/spectrum-propagation --no-deps
+          pip install -e . --no-deps
+      - name: Pytest PostgreSQL integration (startup + FAD + CPAS + concurrency)
+        run: >
+          pytest -q
+          tests/integration/test_startup.py::test_startup_postgres_integration
+          tests/integration/test_fad_publish_postgres.py
+          tests/integration/test_cpas_multi_sas_postgres.py
+          tests/integration/test_concurrency_postgres.py
+
+  # Accepted/certified runtime (Docker + WInnForum harness) is Python 3.11.
+  # Keep this gate focused; full suite remains on 3.12 for forward-compat.
+  runtime-311:
+    name: runtime-python-3.11
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          submodules: recursive
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+      - name: Install system deps (Shapely/GEOS)
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y --no-install-recommends libgeos-dev
+      - name: Install
+        run: |
+          python -m pip install --upgrade 'pip==25.2'
+          pip install -r requirements.lock.txt -r requirements-dev.txt
+          pip install ./plugins/spectrum-propagation --no-deps
+          pip install -e . --no-deps
+          pip install -e tests/plugin_packages/independent_fspl
+          pip install -e tests/plugin_packages/alternate_boundaries
+          pip install -e tests/plugin_packages/synthetic_mechanism
+      - name: Architecture + reproducibility unit gates
+        run: >
+          pytest -q
+          tests/architecture
+          tests/unit/test_dependency_pins.py
+          tests/unit/test_dockerignore_datasets.py
+          tests/unit/test_software_version_metadata.py
+      - name: Packaging smoke
+        run: |
+          pip install 'build==1.2.2'
+          python -m build
+          python -c "import numpy, pykml; print(numpy.__version__, pykml.__name__)"
+
+  docker:
+    name: docker-build
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          submodules: recursive
+      - name: Docker build
+        run: docker build -t sas-core:ci .
+      - name: Import smoke inside image
+        run: >
+          docker run --rm sas-core:ci python -c
+          "import main, numpy, pykml; from profiles import load_profile;
+          load_profile('cbrs_winnforum'); print('docker_import_ok', numpy.__version__)"
+
+  smoke-mtls:
+    name: smoke-mtls-rsa-ecc
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          submodules: recursive
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - name: Install system deps (Shapely/GEOS)
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y --no-install-recommends libgeos-dev
+      - name: Install
+        run: |
+          python -m pip install --upgrade 'pip==25.2'
+          pip install -r requirements.lock.txt -r requirements-dev.txt
+          pip install ./plugins/spectrum-propagation --no-deps
+          pip install -e . --no-deps
+      - name: Generate ephemeral certs
+        run: python -m tools.generate_dev_certs --out /tmp/sas-ci-certs --force
+      - name: Doctor (certs layout)
+        run: CERTS_DIR=/tmp/sas-ci-certs python -m tools.doctor
+      - name: mTLS smoke RSA+ECC
+        run: python -m tools.smoke_mtls --certs-dir /tmp/sas-ci-certs
+
+  winnforum-subset-dry-run:
+    name: winnforum-subset-dry-run
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          submodules: recursive
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - name: Install system deps (Shapely/GEOS)
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y --no-install-recommends libgeos-dev
+      - name: Install
+        run: |
+          python -m pip install --upgrade 'pip==25.2'
+          pip install -r requirements.lock.txt -r requirements-dev.txt
+          pip install ./plugins/spectrum-propagation --no-deps
+          pip install -e . --no-deps
+      - name: Dry-run REG/SIQ/GRA/HBT (no PASS claims; not an official suite run)
+        run: >
+          python -m tools.run_winnforum
+          --dry-run
+          --family REG --family SIQ --family GRA --family HBT
+          --artifacts-root artifacts/winnforum
+      - name: Upload dry-run artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: winnforum-dry-run
+          path: artifacts/winnforum/
+          if-no-files-found: error

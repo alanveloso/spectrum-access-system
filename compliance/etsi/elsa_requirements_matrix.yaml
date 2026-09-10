@@ -1,0 +1,453 @@
+# ETSI eLSA (evolved Licensed Shared Access) requirements matrix.
+# Traceability only — not a conformity claim or protocol implementation.
+# Target profile: profiles/definitions/eu_elsa.yaml.
+# Requirements map normative sources to the current profile, adapters, mechanisms, and tests.
+# Focus: network-centric consumer + availability constraints (not device/Grant vocabulary).
+version: 1
+matrix_id: etsi_elsa_requirements
+profile_id_target: eu_elsa
+primary_instrument:
+  id: ETSI_TS_103_652_1
+  authority: ETSI
+  title: "ETSI TS 103 652-1 V1.1.1 — eLSA Part 1: System requirements"
+  url: "https://www.etsi.org/deliver/etsi_ts/103600_103699/10365201/01.01.01_60/ts_10365201v010101p.pdf"
+  focus_section: "Clause 6 functional system requirements (network/availability)"
+  retrieved_note: "Cited from ETSI deliverable HTML/text extract of TS 103 652-1/2/3 (2020)."
+
+allowed_statuses:
+  - PLANNED_YAML
+  - GAP_PRIMITIVE
+  - GAP_DATA
+  - ADAPTER_REQUIRED
+  - PROCESS
+  - MATRIX_TEST
+  - OUT_OF_SCOPE_PROTOCOL
+  - OUT_OF_SCOPE_MFCN
+
+sources:
+  - id: ETSI_TS_103_652_1
+    authority: ETSI
+    document: "TS 103 652-1 V1.1.1 — System requirements"
+    url: "https://www.etsi.org/deliver/etsi_ts/103600_103699/10365201/01.01.01_60/ts_10365201v010101p.pdf"
+  - id: ETSI_TS_103_652_2
+    authority: ETSI
+    document: "TS 103 652-2 V1.1.1 — System architecture and high-level procedures"
+    url: "https://www.etsi.org/deliver/etsi_ts/103600_103699/10365202/01.01.01_60/ts_10365202v010101p.pdf"
+  - id: ETSI_TS_103_652_3
+    authority: ETSI
+    document: "TS 103 652-3 V1.1.2 — eLSA1 information elements and protocols (eLC↔eLR)"
+    url: "https://www.etsi.org/deliver/etsi_ts/103600_103699/10365203/01.01.02_60/ts_10365203v010102p.pdf"
+  - id: ARCH_PROFILE_DESIGN
+    authority: project
+    document: "Profile-driven architecture design decisions for network-centric authorization and availability"
+    url: null
+  - id: ARCH_CROSS_REGIME_ANALYSIS
+    authority: project
+    document: "Cross-regime semantic analysis for CBRS, ANATEL SLP, and LSA/eLSA"
+    url: null
+  - id: ETSI_ELSA_WORK_PROGRAM
+    authority: ETSI
+    document: "ETSI work programme — TS 103 652 series"
+    url: "https://portal.etsi.org/webapp/WorkProgram/Frame_WorkItemList.asp?SearchPage=TRUE&qETSI_NUMBER=103+652&qETSI_ALL=TRUE"
+
+requirements:
+  - id: ELSA-001
+    source: ETSI_TS_103_652_2
+    section: "4.2.1 eLC / eLR definitions"
+    summary: "Canonical consumer is a VSP MFCN via eLC; eLR stores shared resources and conveys availability — not a CBSD/device grant model."
+    profile_field: "consumer via network/managed-consumer representation; authorization holder + footprints"
+    mechanisms: []
+    code_plugin: "adapters.managed_consumer:ManagedNetworkAdapter; adapters.elsa1:Elsa1ProtocolAdapter"
+    test: "tests/unit/test_managed_network_adapter.py"
+    status: ADAPTER_REQUIRED
+    focus: network_centric
+
+  - id: ELSA-002
+    source: ARCH_PROFILE_DESIGN
+    section: "Generic authorization and domain-model semantics"
+    summary: "Do not promote WInnForum Grant or CBSD as universal domain nouns; lease/authorization is generic; Grant stays CBRS protocol projection."
+    profile_field: "authorization.mechanism in {dynamic_lease,fixed_window} without Grant noun in core"
+    mechanisms:
+      - dynamic_lease
+      - fixed_window
+    forbid_domain_nouns:
+      - Grant
+      - CBSD
+    code_plugin: null
+    test: "MATRIX_TEST"
+    status: PLANNED_YAML
+    focus: network_centric
+
+  - id: ELSA-003
+    source: ETSI_TS_103_652_2
+    section: "4.2.2 eLSA1 reference point"
+    summary: "eLSA1 is the protocol interface between eLR and eLC for eLSRAI exchange and acknowledgement."
+    profile_field: "protocol adapter capability (not Coordination Core)"
+    mechanisms: []
+    code_plugin: "adapters.elsa1:Elsa1ProtocolAdapter + ManagedNetworkAdapter"
+    test: "tests/unit/test_elsa_protocol_adapter.py"
+    status: ADAPTER_REQUIRED
+    focus: network_centric
+
+  - id: ELSA-004
+    source: ETSI_TS_103_652_2
+    section: "4.2.2 eLSA4"
+    summary: "eLC maps eLSRAI into MFCN radio transmitter configurations; MFCN interaction is outside Coordination Core."
+    profile_field: null
+    mechanisms: []
+    code_plugin: "device/network adapter toward MFCN (out of core)"
+    test: null
+    status: OUT_OF_SCOPE_MFCN
+    focus: network_centric
+
+  - id: ELSA-005
+    source: ARCH_PROFILE_DESIGN
+    section: "Protection and availability semantics"
+    summary: "Incumbents are protected entities / availability sources, not ordered_classes access tiers."
+    profile_field: "protection + availability; do not place Incumbent inside access.classes"
+    mechanisms: []
+    omit_profile_sections: []
+    forbid_modeling:
+      - incumbent_as_access_class
+    code_plugin: null
+    test: "MATRIX_TEST"
+    status: PLANNED_YAML
+    focus: network_centric
+
+  - id: ELSA-006
+    source: ETSI_TS_103_652_1
+    section: "R-FUNC-GEN-01"
+    summary: "Support spectrum sharing Incumbent↔eLSA, local-area licensing, and leasing per Sharing Framework (time × space × frequency)."
+    profile_field: "spectrum.ranges; geography.authorized_area; authorization lease/window"
+    mechanisms:
+      - frequency_ranges
+      - authorized_area
+      - fixed_window
+      - dynamic_lease
+    code_plugin: null
+    test: null
+    status: PLANNED_YAML
+    focus: availability
+
+  - id: ELSA-007
+    source: ETSI_TS_103_652_1
+    section: "R-FUNC-GEN-03"
+    summary: "Exchange availability information and its changes over time; permanent connection not required when Sharing Framework allows detached mode."
+    profile_field: "temporal.availability.mechanism=availability_constraint"
+    mechanisms:
+      - availability_constraint
+    code_plugin: null
+    test: "tests/unit/test_availability_primitives.py"
+    status: PLANNED_YAML
+    focus: availability
+
+  - id: ELSA-008
+    source: ETSI_TS_103_652_1
+    section: "R-FUNC-GEN-04"
+    summary: "Multiple eLSA Licensees/Lessees; system does not support contention between MFCNs — each has individual authorization/grant of resource."
+    profile_field: "no GAA-style multi-user contention; per-network authorization scopes"
+    mechanisms: []
+    forbid_mechanisms_for_semantics:
+      - preemption
+    code_plugin: null
+    test: "MATRIX_TEST"
+    status: PROCESS
+    focus: network_centric
+    notes: "preemption remains valid only for class-vs-class regimes (CBRS); not for eLSA multi-MFCN coexistence."
+
+  - id: ELSA-009
+    source: ETSI_TS_103_652_1
+    section: "R-FUNC-GEN-05"
+    summary: "One MFCN may interact with multiple Incumbents/lessors/NRA for distinct spectrum resources."
+    profile_field: "multiple protection/availability sources; multi-scope authorizations"
+    mechanisms: []
+    data_capabilities:
+      - protected_entities
+    code_plugin: null
+    test: null
+    status: GAP_DATA
+    focus: availability
+
+  - id: ELSA-010
+    source: ETSI_TS_103_652_1
+    section: "R-FUNC-GEN-06 / clause 5.4"
+    summary: "Sharing Framework is national and defines spectrum and technical/operational conditions for eLSA."
+    profile_field: "metadata.references + profile constraints derived from national framework (not hardcoded in core)"
+    mechanisms: []
+    code_plugin: null
+    test: "MATRIX_TEST"
+    status: PROCESS
+    focus: availability
+
+  - id: ELSA-011
+    source: ETSI_TS_103_652_1
+    section: "R-FUNC-GEN-11"
+    summary: "Scheduled mode: availability information changes at pre-set times according to a schedule."
+    profile_field: "temporal.availability.mode=scheduled + AvailabilityConstraint"
+    mechanisms:
+      - fixed_window
+      - availability_constraint
+    code_plugin: null
+    test: "tests/unit/test_availability_primitives.py"
+    status: PLANNED_YAML
+    focus: availability
+
+  - id: ELSA-012
+    source: ETSI_TS_103_652_1
+    section: "R-FUNC-GEN-12"
+    summary: "On-demand mode: incumbent usage/protection can change without prior schedule; communicate updated availability (incl. evacuation)."
+    profile_field: "temporal.availability.mode=on_demand + AvailabilityChangeEvent"
+    mechanisms:
+      - snapshot_evaluate_apply
+      - availability_constraint
+    code_plugin: null
+    test: "tests/unit/test_availability_primitives.py"
+    status: PLANNED_YAML
+    focus: availability
+
+  - id: ELSA-013
+    source: ETSI_TS_103_652_2
+    section: "5.4.2 eLSRAI / validity"
+    summary: "eLSRAI may carry a validity time; when expired the eLC shall treat it as no longer applicable and may obtain updated eLSRAI."
+    profile_field: "AvailabilityConstraint.validity (fail closed when expired)"
+    mechanisms:
+      - fixed_window
+      - availability_constraint
+    code_plugin: null
+    test: "tests/unit/test_availability_primitives.py"
+    status: PLANNED_YAML
+    focus: availability
+
+  - id: ELSA-014
+    source: ETSI_TS_103_652_3
+    section: "4.4 eLSRAI Definition"
+    summary: "eLSRAI zones have types (allowance, restriction, protection, exclusion) with space, frequency, radio, and time parameters."
+    profile_field: "AvailabilityConstraint.zone_kind + scope (freq/geo/power/time)"
+    mechanisms:
+      - authorized_area
+      - exclusion_zone
+      - channel_exclusion
+      - max_power
+      - availability_constraint
+    code_plugin: null
+    test: "tests/unit/test_availability_primitives.py"
+    status: PLANNED_YAML
+    focus: availability
+
+  - id: ELSA-015
+    source: ETSI_TS_103_652_1
+    section: "R-FUNC-GEN-17 / clause 5.6"
+    summary: "Geographical sharing via allowance zones where the licensee operates on assigned frequency with predictable QoS."
+    profile_field: "geography.mechanism=authorized_area (allowance zone)"
+    mechanisms:
+      - authorized_area
+      - frequency_ranges
+    code_plugin: null
+    test: null
+    status: PLANNED_YAML
+    focus: availability
+
+  - id: ELSA-016
+    source: ETSI_TS_103_652_1
+    section: "R-FUNC-INC-02"
+    summary: "Translate Incumbent usage/protection requirements into spectrum availability information that constrains the MFCN."
+    profile_field: "protection entities → AvailabilityConstraint (derivation via adapters/providers)"
+    mechanisms:
+      - availability_constraint
+    data_capabilities:
+      - protected_entities
+    code_plugin: null
+    test: "tests/unit/test_availability_primitives.py"
+    status: PLANNED_YAML
+    focus: availability
+
+  - id: ELSA-017
+    source: ETSI_TS_103_652_1
+    section: "R-FUNC-INC-03"
+    summary: "If Incumbent usage/protection requirements change, update availability information communicated to the MFCN."
+    profile_field: "AvailabilityChangeEvent + snapshot_evaluate_apply"
+    mechanisms:
+      - snapshot_evaluate_apply
+      - availability_constraint
+    code_plugin: null
+    test: "tests/unit/test_availability_primitives.py"
+    status: PLANNED_YAML
+    focus: availability
+
+  - id: ELSA-018
+    source: ARCH_PROFILE_DESIGN
+    section: "Availability expiry semantics"
+    summary: "Incumbent return / vacated spectrum is availability expiry, not class-vs-class preemption."
+    profile_field: "AvailabilityConstraint.expired_relative_to (not preemption)"
+    mechanisms:
+      - availability_constraint
+    forbid_mechanisms_for_semantics:
+      - preemption
+    code_plugin: null
+    test: "tests/unit/test_availability_primitives.py"
+    status: PLANNED_YAML
+    focus: availability
+
+  - id: ELSA-019
+    source: ETSI_TS_103_652_1
+    section: "R-FUNC-INC-05"
+    summary: "Incumbent may express protection as constraints on licensee transmissions (allowance/exclusion/restriction zones with EIRP, freq, time)."
+    profile_field: "power + geography constraints; zone packs via data"
+    mechanisms:
+      - max_power
+      - authorized_area
+      - exclusion_zone
+      - fixed_window
+    data_capabilities:
+      - protected_entities
+      - boundaries
+    code_plugin: null
+    test: null
+    status: PLANNED_YAML
+    focus: availability
+
+  - id: ELSA-020
+    source: ETSI_TS_103_652_1
+    section: "R-FUNC-INC-06"
+    summary: "Incumbent may express protection as received-interference constraints (e.g. field strength/PSD) in a protection zone."
+    profile_field: "protection.single_link_threshold optional; rf.required per profile"
+    mechanisms:
+      - single_link_threshold
+      - exclusion_zone
+    code_plugin: "RF port only if profile requires"
+    test: null
+    status: PLANNED_YAML
+    focus: availability
+
+  - id: ELSA-021
+    source: ETSI_TS_103_652_1
+    section: "R-FUNC-GRA-05"
+    summary: "End-to-end acknowledgment for eLSA spectrum resource availability changes (licensee implemented changes)."
+    profile_field: null
+    mechanisms: []
+    code_plugin: "elsa1 elsraiConfirmation procedure (slice)"
+    test: "tests/unit/test_elsa_protocol_adapter.py"
+    status: ADAPTER_REQUIRED
+    focus: availability
+
+  - id: ELSA-022
+    source: ETSI_TS_103_652_1
+    section: "R-FUNC-GEN-03 / Detached Operation"
+    summary: "No CBRS-style per-device heartbeat as generic lease keep-alive; detached MFCN operation is allowed when framework permits."
+    profile_field: "do not require dynamic_lease+periodic as keep-alive"
+    mechanisms: []
+    forbid_mechanisms_as_keepalive:
+      - dynamic_lease
+      - periodic
+    code_plugin: null
+    test: "MATRIX_TEST"
+    status: PLANNED_YAML
+    focus: network_centric
+
+  - id: ELSA-023
+    source: ETSI_TS_103_652_2
+    section: "5.5 eLSRAI Request/Notification/Confirmation"
+    summary: "High-level eLSRAI request, notification, and confirmation procedures synchronize availability between eLR and eLC."
+    profile_field: null
+    mechanisms:
+      - availability_constraint
+    code_plugin: "adapters.elsa1 procedure slice; full TS 103 652-3 IE encoding still out of scope"
+    test: "tests/unit/test_elsa_protocol_adapter.py"
+    status: ADAPTER_REQUIRED
+    focus: availability
+
+  - id: ELSA-024
+    source: ETSI_TS_103_652_1
+    section: "clause 5.6"
+    summary: "No requirement for automatic neighbour-to-neighbour interference coordination between local MFCNs; neighbour relations are planning-time."
+    profile_field: "do not require aggregate IAP-style multi-SAS fairshare for eLSA profile"
+    mechanisms: []
+    code_plugin: null
+    test: "MATRIX_TEST"
+    status: PROCESS
+    focus: network_centric
+
+  - id: ELSA-025
+    source: ARCH_CROSS_REGIME_ANALYSIS
+    section: "RF / rf.required"
+    summary: "RF backend is profile-gated; eLSA may operate with limited or no RF path-loss aggregate — fail-closed only when rf.required."
+    profile_field: "rf.required: false|true per profile"
+    mechanisms: []
+    explicit_profile_fields:
+      - rf.required
+    code_plugin: "RF port"
+    test: "MATRIX_TEST"
+    status: PLANNED_YAML
+    focus: network_centric
+
+  - id: ELSA-026
+    source: ETSI_TS_103_652_1
+    section: "R-FUNC-GEN-14"
+    summary: "Verify inputs; reject incumbent/rule changes that violate Sharing Framework or rights of use (fail closed at admission)."
+    profile_field: "fail-closed validation before evaluate/apply"
+    mechanisms:
+      - snapshot_evaluate_apply
+    code_plugin: null
+    test: "MATRIX_TEST"
+    status: PLANNED_YAML
+    focus: availability
+
+  - id: ELSA-027
+    source: ETSI_ELSA_WORK_PROGRAM
+    section: "SOURCES.md eLSA"
+    summary: "Engineering target profile id eu_elsa maps to the ETSI TS 103 652 series."
+    profile_field: "metadata.id=eu_elsa"
+    mechanisms: []
+    code_plugin: null
+    test: "MATRIX_TEST"
+    status: MATRIX_TEST
+    focus: network_centric
+
+architecture_hypothesis_updates:
+  - hypothesis: "availability_constraint is first-class for LSA/eLSA"
+    verdict: confirmed
+    by: ELSA-007
+    note: "Registered on the AUTHORIZATION axis; not invented from CBRS Grant/heartbeat."
+  - hypothesis: "Incumbent return modeled as preemption"
+    verdict: rejected
+    by: ELSA-018
+    note: "Availability expiry, not class-vs-class preemption."
+  - hypothesis: "Canonical consumer is CBSD-like device"
+    verdict: rejected
+    by: ELSA-001
+    note: "Network/MFCN via eLC; do not model the consumer as a CBSD."
+  - hypothesis: "Channelization fixed grid required"
+    verdict: not_required
+    by: ELSA-006
+    note: "eLSA uses assigned blocks/ranges and zones; fixed_width_channelization remains optional."
+
+focus_coverage:
+  network_centric_requirement_ids:
+    - ELSA-001
+    - ELSA-002
+    - ELSA-003
+    - ELSA-004
+    - ELSA-005
+    - ELSA-008
+    - ELSA-022
+    - ELSA-024
+    - ELSA-025
+    - ELSA-027
+  availability_requirement_ids:
+    - ELSA-006
+    - ELSA-007
+    - ELSA-009
+    - ELSA-010
+    - ELSA-011
+    - ELSA-012
+    - ELSA-013
+    - ELSA-014
+    - ELSA-015
+    - ELSA-016
+    - ELSA-017
+    - ELSA-018
+    - ELSA-019
+    - ELSA-020
+    - ELSA-021
+    - ELSA-023
+    - ELSA-026

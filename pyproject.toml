@@ -1,0 +1,157 @@
+[build-system]
+requires = ["setuptools==75.8.2", "wheel==0.45.1"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "spectrum-access-system"
+version = "1.0.0"
+description = "Profile-driven Spectrum Access System platform with CBRS/WInnForum reference implementation"
+readme = "README.md"
+requires-python = ">=3.11"
+license = { text = "Apache-2.0" }
+authors = [{ name = "spectrum-access-system contributors" }]
+dependencies = [
+  "fastapi==0.141.1",
+  "uvicorn[standard]==0.52.1",
+  "sqlalchemy==2.0.51",
+  "alembic==1.16.4",
+  "pydantic==2.13.4",
+  "pydantic-settings==2.14.2",
+  "psycopg2-binary==2.9.12",
+  "celery==5.6.3",
+  "cryptography==50.0.0",
+  "httpx==0.28.1",
+  "PyYAML==6.0.3",
+  "shapely==1.7.1",
+  "numpy==1.26.4",
+  "pykml==0.2.0",
+]
+
+[project.entry-points."spectrum_access.device_adapters"]
+mapping = "adapters.device:MappingDeviceAdapter"
+cbsd = "adapters.cbsd:cbsd_device_adapter"
+
+[project.entry-points."spectrum_access.network_adapters"]
+mapping = "adapters.device:MappingNetworkAdapter"
+managed = "adapters.managed_consumer:managed_network_adapter"
+
+[project.entry-points."spectrum_access.protocol_adapters"]
+generic_json = "adapters.protocol:GenericJsonProtocolAdapter"
+winnforum_rest = "adapters.winnforum_rest:winnforum_rest_protocol_adapter"
+elsa1 = "adapters.elsa1:elsa1_protocol_adapter"
+
+[project.entry-points."spectrum_access.rf_models"]
+free_space = "rf.external_propagation:free_space_rf_adapter"
+itm = "rf.external_propagation:itm_rf_adapter"
+
+[project.entry-points."spectrum_access.data_providers"]
+bundle_protected_entities = "providers.operator_feature_bundle:protected_entities_provider"
+bundle_boundaries = "providers.operator_feature_bundle:boundaries_provider"
+protection_terrain = "providers.protection_bundle:protection_terrain_provider"
+protection_boundaries = "providers.protection_bundle:protection_boundaries_provider"
+protection_reference = "providers.protection_bundle:protection_reference_provider"
+protection_land_cover = "providers.protection_bundle:protection_land_cover_provider"
+protection_rights = "providers.protection_bundle:protection_rights_provider"
+
+[project.optional-dependencies]
+dev = [
+  "pytest==9.1.1",
+  "pytest-cov==6.2.1",
+  "coverage==7.10.2",
+  "freezegun==1.5.2",
+  "ruff==0.12.8",
+  "mypy==1.17.1",
+  "types-PyYAML==6.0.12.20250822",
+]
+
+[tool.setuptools]
+py-modules = ["main", "config", "database", "celery_app", "tasks"]
+
+[tool.setuptools.packages.find]
+include = [
+  "models*",
+  "routes*",
+  "schemas*",
+  "services*",
+  "profiles*",
+  "protection_data*",
+  "tools*",
+  "compliance*",
+  "primitives*",
+  "adapters*",
+  "providers*",
+  "rf*",
+  "runtime*",
+  "schema_alembic*",
+]
+
+[tool.setuptools.package-data]
+profiles = [
+  "definitions/*.yaml",
+  "profiles/templates/*.yaml",
+  "profiles/examples/*.yaml",
+]
+runtime = ["deployments/*.yaml"]
+protection_data = ["manifests/*.yaml", "manifests/*.yml"]
+compliance = ["*.yaml"]
+schema_alembic = ["env.py", "script.py.mako", "versions/*.py"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+pythonpath = ["."]
+markers = [
+  "integration: crosses process/Docker boundaries",
+  "contract: Admin/harness path contracts",
+  "security: certificate and doctor checks",
+  "no_runtime_composition: skip autouse reference RuntimeComposition binding",
+]
+
+[tool.coverage.run]
+branch = true
+source = [
+  "main",
+  "config",
+  "database",
+  "models",
+  "routes",
+  "schemas",
+  "services",
+  "profiles",
+  "protection_data",
+  "tools",
+  "primitives",
+  "adapters",
+  "providers",
+  "rf",
+  "runtime",
+]
+omit = ["tests/*", "*/__pycache__/*"]
+
+[tool.coverage.report]
+show_missing = true
+skip_empty = true
+
+[tool.ruff]
+target-version = "py311"
+line-length = 100
+extend-exclude = [".venv", "artifacts", ".cache", "plugins"]
+
+[tool.ruff.lint]
+select = ["E", "F"]
+ignore = ["E501"]
+
+[tool.ruff.lint.per-file-ignores]
+"main.py" = ["E402"]
+"tasks.py" = ["E402"]
+"celery_app.py" = ["E402"]
+
+[tool.ruff.format]
+quote-style = "double"
+
+[tool.mypy]
+python_version = "3.12"
+warn_return_any = true
+warn_unused_configs = true
+ignore_missing_imports = true
+pretty = true
+files = ["compliance", "tools"]

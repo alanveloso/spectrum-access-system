@@ -1,0 +1,3 @@
+[submodule "plugins/spectrum-propagation"]
+	path = plugins/spectrum-propagation
+	url = https://github.com/alanveloso/spectrum-propagation.git

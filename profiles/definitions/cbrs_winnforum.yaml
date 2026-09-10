@@ -1,0 +1,99 @@
+# Reference CBRS composition for the canonical spectrum Profile .
+# IAP fairshare, DPA move-list, ESC mask, and daily CPAS publication
+# remain implemented in services.
+
+api_version: spectrum-access/v2
+kind: SpectrumProfile
+
+metadata:
+  id: cbrs_winnforum
+  version: "2.0.0"
+  status: reference
+  based_on: cbrs_winnforum@1.0.0
+  references:
+    - winnforum_cbrs_baseline_v1
+
+spectrum:
+  ranges:
+    - id: primary
+      low_hz: 3550000000
+      high_hz: 3700000000
+  channelization:
+    mechanism: fixed_width_channelization
+    width_hz: 10000000
+    origin_hz: 3550000000
+    role: assignment
+
+access:
+  mechanism: ordered_classes
+  classes:
+    - id: incumbent
+      priority: 300
+      preemptible: false
+    - id: pal
+      priority: 200
+      preemptible: false
+    - id: gaa
+      priority: 100
+      preemptible: true
+
+authorization:
+  mechanism: dynamic_lease
+  duration_s: 900
+
+power:
+  mechanism: rule_table
+  rules:
+    - max_eirp_dbm: 30.0
+      max_psd_dbm_mhz: 20.0
+      device_class: A
+    - max_eirp_dbm: 47.0
+      max_psd_dbm_mhz: 37.0
+      device_class: B
+
+temporal:
+  reevaluation:
+    mechanism: periodic
+    interval_s: 60
+
+protection:
+  mechanisms:
+    - protection_entitlement
+    - channel_exclusion
+    - distance_exclusion
+    - exclusion_zone
+    - single_link_threshold
+    - aggregate_linear_power
+  bindings:
+    - id: peer_esc
+      mechanism: distance_exclusion
+      distance_m: 40000
+      frequency:
+        low_hz: 3550000000
+        high_hz: 3700000000
+    - id: peer_ppa
+      mechanism: distance_exclusion
+      distance_m: 1000
+
+coordination:
+  mechanism: snapshot_evaluate_apply
+
+rf:
+  required: true
+  policy: path_loss_plus_aggregate
+  propagation_model: path_loss
+
+data:
+  required_capabilities:
+    - terrain
+    - land_cover
+    - protected_entities
+    - rights
+    - boundaries
+    - reference_data
+
+requirements:
+  device_capabilities:
+    - geolocation
+    - frequency_range
+    - max_eirp

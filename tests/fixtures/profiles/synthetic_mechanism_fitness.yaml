@@ -1,0 +1,30 @@
+# Test-only profile: requires an externally discovered protection mechanism.
+# Not a production profile. Used for mechanism discovery fitness proofs.
+#
+# Deliberately keeps the existing synthetic_minimal profile unchanged so that
+# non-CBRS startup isolation regressions remain independent of this proof.
+api_version: spectrum-access/v2
+kind: SpectrumProfile
+metadata:
+  id: synthetic_mechanism_fitness
+  version: "1.0.0"
+  status: custom
+
+spectrum:
+  ranges:
+    - id: primary
+      low_hz: 1000000000
+      high_hz: 1100000000
+
+authorization:
+  mechanism: dynamic_lease
+  duration_s: 3600
+
+protection:
+  mechanisms:
+    - synthetic_mechanism
+
+requirements:
+  network_capabilities:
+    - network_identity
+    - frequency_range
